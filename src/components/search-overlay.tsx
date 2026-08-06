@@ -65,7 +65,7 @@ export function SearchOverlay({ open, onClose, onAdded }: { open: boolean; onClo
       {message && <p className="mt-5 text-sm text-accent">{message}</p>}
       <div className="scrollbar-none mt-10 flex gap-4 overflow-x-auto pb-6">
         {results.map((anime) => <article key={anime.anilistId} className="w-44 shrink-0 sm:w-52">
-          <div className="relative aspect-[2/3] overflow-hidden bg-[#171717]"><Image src={anime.imageUrl} alt="" fill sizes="208px" className="object-cover" /><button disabled={busy === anime.anilistId} onClick={() => add(anime.anilistId)} type="button" aria-label={`Add ${anime.title}`} className="absolute bottom-0 right-0 flex size-12 items-center justify-center border-l border-t border-white bg-[#0d0d0d] text-white hover:bg-accent disabled:opacity-50"><Plus className="size-5" /></button></div>
+          <div className="relative aspect-[2/3] overflow-hidden bg-[#171717]"><Image src={anime.imageUrl} alt="" fill quality={90} sizes="(min-width: 640px) 208px, 176px" className="object-cover" /><button disabled={busy === anime.anilistId} onClick={() => add(anime.anilistId)} type="button" aria-label={`Add ${anime.title}`} className="absolute bottom-0 right-0 flex size-12 items-center justify-center border-l border-t border-white bg-[#0d0d0d] text-white hover:bg-accent disabled:opacity-50"><Plus className="size-5" /></button></div>
           <h2 className="title-font mt-3 line-clamp-2 text-2xl leading-none">{anime.titleEnglish ?? anime.title}</h2><p className="mt-2 text-xs text-white/45">{anime.airing ? "CURRENTLY AIRING" : anime.status ?? anime.type}</p>
         </article>)}
       </div>
