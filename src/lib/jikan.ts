@@ -13,6 +13,7 @@ export type AnimeSearchResult = {
   broadcastDay: string | null;
   broadcastTime: string | null;
   broadcastTimezone: string | null;
+  nextEpisode?: number;
 };
 
 type JikanAnime = {
@@ -99,8 +100,20 @@ export async function searchAnime(query: string) {
 }
 
 export async function getAnime(malId: number) {
-  const response = await fetch(`${JIKAN_URL}/anime/${malId}/full`, { next: { revalidate: 300 } });
-  if (!response.ok) throw new Error("Anime details are temporarily unavailable");
-  const payload = (await response.json()) as { data: JikanAnime };
-  return normalize(payload.data);
+  const [detailsResponse, episodesResponse] = await Promise.all([
+    fetch(`${JIKAN_URL}/anime/${malId}/full`, { next: { revalidate: 300 } }),
+    fetch(`${JIKAN_URL}/anime/${malId}/episodes`, { next: { revalidate: 300 } }),
+  ]);
+  if (!detailsResponse.ok) throw new Error("Anime details are temporarily unavailable");
+  const payload = (await detailsResponse.json()) as { data: JikanAnime };
+  const anime = normalize(payload.data);
+  if (episodesResponse.ok) {
+    const episodes = (await episodesResponse.json()) as { data: Array<{ mal_id: number; aired: string | null }> };
+    const now = Date.now();
+    const airedCount = episodes.data.filter((episode) => episode.aired && new Date(episode.aired).getTime() <= now).length;
+    const scheduled = episodes.data.find((episode) => episode.aired && new Date(episode.aired).getTime() > now);
+    anime.nextEpisode = scheduled?.mal_id ?? airedCount + 1;
+    if (scheduled?.aired) anime.nextAiringAt = scheduled.aired;
+  }
+  return anime;
 }

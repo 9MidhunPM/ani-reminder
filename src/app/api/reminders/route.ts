@@ -34,14 +34,14 @@ export async function POST(request: Request) {
       title: anime.title,
       titleEnglish: anime.titleEnglish,
       imageUrl: anime.imageUrl,
-      nextEpisode: 1,
+      nextEpisode: anime.nextEpisode ?? 1,
       nextAiringAt,
       broadcastDay: anime.broadcastDay,
       broadcastTime: anime.broadcastTime,
       broadcastTimezone: anime.broadcastTimezone,
       totalEpisodes: anime.episodes,
     },
-    update: { enabled: true, nextAiringAt, imageUrl: anime.imageUrl },
+    update: { enabled: true, nextEpisode: anime.nextEpisode ?? 1, nextAiringAt, imageUrl: anime.imageUrl },
   });
   return NextResponse.json({ reminder }, { status: 201 });
 }
