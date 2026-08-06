@@ -1,13 +1,12 @@
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 import { credentialsSchema } from "@/lib/validation";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -30,23 +29,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-    session({ session, token }) {
-      if (session.user && token.id) session.user.id = token.id;
-      return session;
-    },
-    authorized({ auth: session, request }) {
-      const isAuthenticated = Boolean(session?.user);
-      const isAuthPage = ["/login", "/signup"].includes(request.nextUrl.pathname);
-      if (isAuthPage && isAuthenticated) {
-        return Response.redirect(new URL("/", request.nextUrl));
-      }
-      if (!isAuthPage && !isAuthenticated) return false;
-      return true;
-    },
-  },
 });
