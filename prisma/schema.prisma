@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  passwordHash String
+  ntfyTopic    String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  reminders    AnimeReminder[]
+}
+
+model AnimeReminder {
+  id                 String   @id @default(cuid())
+  userId             String
+  malId              Int
+  title              String
+  titleEnglish       String?
+  imageUrl            String
+  nextEpisode         Int
+  nextAiringAt        DateTime
+  broadcastDay        String?
+  broadcastTime       String?
+  broadcastTimezone   String?
+  totalEpisodes       Int?
+  enabled             Boolean  @default(true)
+  morningNotifiedFor  DateTime?
+  airtimeNotifiedFor  DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, malId])
+  @@index([enabled, nextAiringAt])
+}
