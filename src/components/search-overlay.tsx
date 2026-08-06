@@ -51,7 +51,9 @@ export function SearchOverlay({ open, onClose, onAdded }: { open: boolean; onClo
     const body = await response.json();
     setBusy(null);
     if (!response.ok) { setMessage(body.error ?? "Could not add anime"); return; }
-    onAdded(); onClose();
+    onAdded();
+    if (body.testNotification === "failed") { setMessage("ANIME ADDED — TEST NOTIFICATION FAILED. CHECK YOUR NTFY TOPIC."); return; }
+    onClose();
   }
 
   return <AnimatePresence>{open && <motion.section role="dialog" aria-modal="true" aria-label="Search anime" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 overflow-y-auto bg-black/[.92] px-5 py-5 sm:px-12 sm:py-10">

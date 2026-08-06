@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getAnime } from "@/lib/anilist";
+import { sendNtfy } from "@/lib/notifications";
 import { addReminderSchema } from "@/lib/validation";
 
 export async function GET() {
@@ -57,5 +58,25 @@ export async function POST(request: Request) {
           ...data,
         },
       });
-  return NextResponse.json({ reminder }, { status: 201 });
+
+  let testNotification: "sent" | "failed" = "sent";
+  if (!existing) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { ntfyTopic: true },
+    });
+    if (user) {
+      try {
+        await sendNtfy(
+          user.ntfyTopic,
+          "AniReminder",
+          `🎬 ${reminder.title} added to AniReminder — reminders will arrive like this:\n\n🌅 ${reminder.title} airs today — Episode ${reminder.nextEpisode} drops at ${reminder.broadcastTime ?? "its scheduled time"}\n⚡ Episode ${reminder.nextEpisode} of ${reminder.title} is out NOW`,
+          "tada",
+        );
+      } catch {
+        testNotification = "failed";
+      }
+    }
+  }
+  return NextResponse.json({ reminder, testNotification }, { status: 201 });
 }
