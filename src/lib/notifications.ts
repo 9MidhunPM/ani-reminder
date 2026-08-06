@@ -8,6 +8,7 @@ export async function sendNtfy(topic: string, title: string, message: string, ta
       "Content-Type": "text/plain; charset=utf-8",
     },
     body: message,
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) throw new Error(`ntfy returned ${response.status}`);
 }

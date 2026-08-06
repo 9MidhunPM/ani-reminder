@@ -31,11 +31,13 @@ Open [http://localhost:3000](http://localhost:3000), create an account, and ente
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection URL used by Prisma | Yes |
-| `NEXTAUTH_SECRET` | Random secret used to sign authentication tokens | Yes |
-| `NEXTAUTH_URL` | Canonical application URL | Yes |
+| `AUTH_SECRET` | Random secret used to encrypt authentication tokens | Yes |
+| `AUTH_URL` | Canonical application URL | Yes |
 | `CRON_SECRET` | Separate secret protecting the reminder scheduler endpoint | Yes |
+| `DATA_ENCRYPTION_KEY` | Base64-encoded 32-byte key used to encrypt ntfy topics at rest | Yes |
 
-Generate secrets with `openssl rand -base64 32`. Never reuse `NEXTAUTH_SECRET` as `CRON_SECRET`.
+Generate each secret independently with `openssl rand -base64 32`. Never reuse authentication, cron, or data-encryption keys.
+Keep `DATA_ENCRYPTION_KEY` stable and backed up; changing or losing it makes existing encrypted ntfy topics unreadable.
 
 ## Commands
 
@@ -50,7 +52,7 @@ npm run db:deploy    # apply committed migrations
 
 ## Deployment
 
-The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prisma migrations on startup, and runs an internal minute-level cron that calls the authenticated `/api/cron` endpoint. The container listens on port `3000`.
+The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prisma migrations on startup, and runs an internal minute-level cron that calls the authenticated `/api/cron` endpoint. The web server drops root privileges before listening on port `3000`. PostgreSQL must remain on the private container network with no external port or public domain.
 
 ## Tech Stack
 

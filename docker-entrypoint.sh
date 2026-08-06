@@ -8,4 +8,4 @@ cat > /etc/crontabs/root <<EOF
 EOF
 
 crond
-exec node server.js
+exec su-exec nextjs:nodejs node server.js

@@ -44,6 +44,7 @@ async function queryAniList<T>(query: string, variables: Record<string, unknown>
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
+    signal: AbortSignal.timeout(10_000),
     next: { revalidate: 60 },
   });
   const payload = (await response.json()) as { data?: T; errors?: Array<{ message: string }> };

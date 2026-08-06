@@ -41,11 +41,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="email" name="email" type="email" autoComplete="email" required />
         </label>
         <label className="block text-sm text-white/65" htmlFor="password">Password
-          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="password" name="password" type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} required />
+          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="password" name="password" type="password" minLength={mode === "login" ? 8 : 12} maxLength={72} autoComplete={mode === "login" ? "current-password" : "new-password"} required />
         </label>
         {mode === "signup" && <label className="block text-sm text-white/65" htmlFor="ntfyTopic">ntfy topic
-          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="ntfyTopic" name="ntfyTopic" type="text" pattern={"[a-zA-Z0-9_\\-]+"} placeholder="my-private-topic" required />
-          <span className="mt-2 block text-xs text-white/40">Subscribe to this topic in the ntfy app.</span>
+          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="ntfyTopic" name="ntfyTopic" type="text" minLength={12} maxLength={64} pattern={"[a-zA-Z0-9_\\-]+"} placeholder="my-private-topic" autoComplete="off" required />
+          <span className="mt-2 block text-xs text-white/40">Use a hard-to-guess private topic, then subscribe to it in ntfy.</span>
         </label>}
       </div>
       {error && <p role="alert" className="mt-4 text-sm text-accent">{error}</p>}

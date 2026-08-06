@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAnime } from "@/lib/anilist";
 import { prisma } from "@/lib/prisma";
 import { sendNtfy } from "@/lib/notifications";
+import { decryptSecret } from "@/lib/secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   const windowEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const reminders = await prisma.animeReminder.findMany({
     where: { enabled: true, nextAiringAt: { lte: windowEnd } },
-    include: { user: true },
+    include: { user: { select: { ntfyTopic: true } } },
   });
   let sent = 0;
   let failed = 0;
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
     ));
     if (now >= morning && reminder.morningNotifiedFor?.getTime() !== reminder.nextAiringAt.getTime()) {
       try {
-        await sendNtfy(reminder.user.ntfyTopic, "AniReminder", `🌅 ${reminder.title} airs today — Episode ${reminder.nextEpisode} drops at ${reminder.broadcastTime ?? "its scheduled time"}`, "sunrise");
+        await sendNtfy(decryptSecret(reminder.user.ntfyTopic), "AniReminder", `🌅 ${reminder.title} airs today — Episode ${reminder.nextEpisode} drops at ${reminder.broadcastTime ?? "its scheduled time"}`, "sunrise");
         await prisma.animeReminder.update({ where: { id: reminder.id }, data: { morningNotifiedFor: reminder.nextAiringAt } });
         sent += 1;
       } catch {
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
     }
     if (now >= reminder.nextAiringAt && reminder.airtimeNotifiedFor?.getTime() !== reminder.nextAiringAt.getTime()) {
       try {
-        await sendNtfy(reminder.user.ntfyTopic, "AniReminder", `⚡ Episode ${reminder.nextEpisode} of ${reminder.title} is out NOW`, "zap");
+        await sendNtfy(decryptSecret(reminder.user.ntfyTopic), "AniReminder", `⚡ Episode ${reminder.nextEpisode} of ${reminder.title} is out NOW`, "zap");
         const refreshed = reminder.anilistId ? await getAnime(reminder.anilistId).catch(() => null) : null;
         const publishedNextAiring = refreshed?.nextAiringAt ? new Date(refreshed.nextAiringAt) : null;
         const nextAiringAt = publishedNextAiring && publishedNextAiring > reminder.nextAiringAt
@@ -64,5 +65,6 @@ export async function GET(request: Request) {
       }
     }
   }
+  await prisma.rateLimit.deleteMany({ where: { updatedAt: { lt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) } } });
   return NextResponse.json({ checked: reminders.length, sent, failed });
 }

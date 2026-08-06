@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getAnime } from "@/lib/anilist";
 import { sendNtfy } from "@/lib/notifications";
+import { hasSameOrigin, readJson, RequestError } from "@/lib/request-security";
+import { decryptSecret } from "@/lib/secrets";
 import { addReminderSchema } from "@/lib/validation";
 
 export async function GET() {
@@ -18,7 +20,15 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const parsed = addReminderSchema.safeParse(await request.json());
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+  let body: unknown;
+  try {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestError) return NextResponse.json({ error: error.message }, { status: error.status });
+    throw error;
+  }
+  const parsed = addReminderSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid anime" }, { status: 400 });
 
   const anime = await getAnime(parsed.data.anilistId);
@@ -68,7 +78,7 @@ export async function POST(request: Request) {
     if (user) {
       try {
         await sendNtfy(
-          user.ntfyTopic,
+          decryptSecret(user.ntfyTopic),
           "AniReminder",
           `🎬 ${reminder.title} added to AniReminder — reminders will arrive like this:\n\n🌅 ${reminder.title} airs today — Episode ${reminder.nextEpisode} drops at ${reminder.broadcastTime ?? "its scheduled time"}\n⚡ Episode ${reminder.nextEpisode} of ${reminder.title} is out NOW`,
           "tada",
