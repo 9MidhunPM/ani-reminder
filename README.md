@@ -4,7 +4,7 @@ Track seasonal anime releases and receive ntfy pushes at 6 AM IST and exact epis
 
 ## Features
 
-- **Jikan search:** Add anime directly from MyAnimeList data without manual schedule entry.
+- **AniList search:** Add anime directly from AniList data without manual schedule entry.
 - **Release alerts:** Deliver release-day and airtime notifications through a private ntfy topic.
 - **Schedule tracking:** Follow weekly and irregular episode dates with live countdowns.
 - **Per-anime controls:** Pause or delete reminders independently.
@@ -58,7 +58,7 @@ The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prism
 - [Tailwind CSS v4](https://tailwindcss.com/) and Framer Motion
 - [Auth.js](https://authjs.dev/) credentials authentication
 - [Prisma](https://www.prisma.io/) with PostgreSQL
-- [Jikan API](https://docs.api.jikan.moe/) anime metadata
+- [AniList GraphQL API](https://docs.anilist.co/) anime metadata and exact airing schedules
 - [ntfy](https://ntfy.sh/) push notifications
 
 ## License
