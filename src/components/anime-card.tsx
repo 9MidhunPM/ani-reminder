@@ -34,7 +34,7 @@ export function AnimeCard({ reminder, onChanged }: { reminder: AnimeReminder; on
         alt=""
         fill
         quality={90}
-        sizes="(min-width: 1536px) 22vw, (min-width: 1280px) 30vw, (min-width: 640px) 46vw, 100vw"
+        sizes="(min-width: 1280px) 23vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
         className={`object-cover transition-transform duration-500 group-hover:scale-[1.025] ${!reminder.enabled ? "opacity-45 grayscale" : ""}`}
       />
       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
