@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAnime } from "@/lib/anilist";
 import { prisma } from "@/lib/prisma";
 import { sendNtfy } from "@/lib/notifications";
 
@@ -40,14 +41,21 @@ export async function GET(request: Request) {
     if (now >= reminder.nextAiringAt && reminder.airtimeNotifiedFor?.getTime() !== reminder.nextAiringAt.getTime()) {
       try {
         await sendNtfy(reminder.user.ntfyTopic, "AniReminder", `⚡ Episode ${reminder.nextEpisode} of ${reminder.title} is out NOW`, "zap");
-        const nextAiringAt = new Date(reminder.nextAiringAt);
-        nextAiringAt.setUTCDate(nextAiringAt.getUTCDate() + 7);
+        const refreshed = reminder.anilistId ? await getAnime(reminder.anilistId).catch(() => null) : null;
+        const publishedNextAiring = refreshed?.nextAiringAt ? new Date(refreshed.nextAiringAt) : null;
+        const nextAiringAt = publishedNextAiring && publishedNextAiring > reminder.nextAiringAt
+          ? publishedNextAiring
+          : new Date(reminder.nextAiringAt.getTime() + 7 * 24 * 60 * 60 * 1000);
         await prisma.animeReminder.update({
           where: { id: reminder.id },
           data: {
             airtimeNotifiedFor: reminder.nextAiringAt,
-            nextEpisode: { increment: 1 },
+            nextEpisode: refreshed?.nextEpisode && refreshed.nextEpisode > reminder.nextEpisode
+              ? refreshed.nextEpisode
+              : { increment: 1 },
             nextAiringAt,
+            broadcastDay: refreshed?.broadcastDay ?? reminder.broadcastDay,
+            broadcastTime: refreshed?.broadcastTime ?? reminder.broadcastTime,
           },
         });
         sent += 1;

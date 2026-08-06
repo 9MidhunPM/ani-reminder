@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getAnime } from "@/lib/jikan";
+import { getAnime } from "@/lib/anilist";
 import { addReminderSchema } from "@/lib/validation";
 
 export async function GET() {
@@ -20,28 +20,42 @@ export async function POST(request: Request) {
   const parsed = addReminderSchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid anime" }, { status: 400 });
 
-  const anime = await getAnime(parsed.data.malId);
+  const anime = await getAnime(parsed.data.anilistId);
   const nextAiringAt = anime.nextAiringAt ? new Date(anime.nextAiringAt) : null;
   if (!nextAiringAt || Number.isNaN(nextAiringAt.getTime())) {
     return NextResponse.json({ error: "This anime has no published broadcast schedule" }, { status: 422 });
   }
 
-  const reminder = await prisma.animeReminder.upsert({
-    where: { userId_malId: { userId: session.user.id, malId: anime.malId } },
-    create: {
+  const existing = await prisma.animeReminder.findFirst({
+    where: {
       userId: session.user.id,
-      malId: anime.malId,
-      title: anime.title,
-      titleEnglish: anime.titleEnglish,
-      imageUrl: anime.imageUrl,
-      nextEpisode: anime.nextEpisode ?? 1,
-      nextAiringAt,
-      broadcastDay: anime.broadcastDay,
-      broadcastTime: anime.broadcastTime,
-      broadcastTimezone: anime.broadcastTimezone,
-      totalEpisodes: anime.episodes,
+      OR: [
+        { anilistId: anime.anilistId },
+        ...(anime.malId ? [{ malId: anime.malId }] : []),
+      ],
     },
-    update: { enabled: true, nextEpisode: anime.nextEpisode ?? 1, nextAiringAt, imageUrl: anime.imageUrl },
   });
+  const data = {
+    anilistId: anime.anilistId,
+    malId: anime.malId,
+    title: anime.title,
+    titleEnglish: anime.titleEnglish,
+    imageUrl: anime.imageUrl,
+    nextEpisode: anime.nextEpisode ?? 1,
+    nextAiringAt,
+    broadcastDay: anime.broadcastDay,
+    broadcastTime: anime.broadcastTime,
+    broadcastTimezone: anime.broadcastTimezone,
+    totalEpisodes: anime.episodes,
+    enabled: true,
+  };
+  const reminder = existing
+    ? await prisma.animeReminder.update({ where: { id: existing.id }, data })
+    : await prisma.animeReminder.create({
+        data: {
+          userId: session.user.id,
+          ...data,
+        },
+      });
   return NextResponse.json({ reminder }, { status: 201 });
 }

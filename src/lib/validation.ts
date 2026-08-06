@@ -15,5 +15,5 @@ export const signupSchema = credentialsSchema.extend({
 });
 
 export const addReminderSchema = z.object({
-  malId: z.number().int().positive(),
+  anilistId: z.number().int().positive(),
 });
