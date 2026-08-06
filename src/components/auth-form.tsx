@@ -44,7 +44,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="password" name="password" type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} required />
         </label>
         {mode === "signup" && <label className="block text-sm text-white/65" htmlFor="ntfyTopic">ntfy topic
-          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="ntfyTopic" name="ntfyTopic" type="text" pattern="[a-zA-Z0-9_-]+" placeholder="my-private-topic" required />
+          <input className="mt-2 h-11 w-full rounded-[2px] border border-white/25 bg-transparent px-3 text-base text-white outline-none focus:border-accent" id="ntfyTopic" name="ntfyTopic" type="text" pattern="[-a-zA-Z0-9_]+" placeholder="my-private-topic" required />
           <span className="mt-2 block text-xs text-white/40">Subscribe to this topic in the ntfy app.</span>
         </label>}
       </div>
