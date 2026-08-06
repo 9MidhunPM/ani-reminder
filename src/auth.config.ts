@@ -19,9 +19,9 @@ export const authConfig = {
       const isAuthenticated = Boolean(session?.user);
       const isAuthPage = ["/login", "/signup"].includes(request.nextUrl.pathname);
       if (isAuthPage && isAuthenticated) {
-        return Response.redirect(new URL("/", request.nextUrl));
+        return Response.redirect(new URL("/dashboard", request.nextUrl));
       }
-      if (!isAuthPage && !isAuthenticated) return false;
+      if (request.nextUrl.pathname !== "/" && !isAuthPage && !isAuthenticated) return false;
       return true;
     },
   },

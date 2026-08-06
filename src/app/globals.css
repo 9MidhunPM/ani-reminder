@@ -19,7 +19,7 @@
 }
 
 * { box-sizing: border-box; }
-html { background: var(--background); }
+html { background: var(--background); scroll-behavior: smooth; }
 body {
   min-height: 100vh;
   background: var(--background);

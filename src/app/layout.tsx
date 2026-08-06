@@ -14,8 +14,8 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "AniReminder | Never miss an episode",
-  description: "Track anime releases and get precise ntfy reminders when new episodes air.",
+  title: "AniReminder | Anime episode alerts, on time",
+  description: "Build an anime lineup and receive precise ntfy reminders on airing day and when the next episode drops.",
 };
 
 export default function RootLayout({

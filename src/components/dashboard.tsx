@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, LogOut, Search } from "lucide-react";
+import { Bell, Home, LogOut, Search } from "lucide-react";
+import Link from "next/link";
 import { signOut } from "next-auth/react";
 import type { AnimeReminder } from "@prisma/client";
 import { useState } from "react";
@@ -17,13 +18,13 @@ export function Dashboard({ initialReminders, email }: { initialReminders: Anime
     if (response.ok) setReminders((await response.json()).reminders);
   }
 
-  return <div className="min-h-screen lg:pl-16">
+  return <div className="min-h-dvh lg:pl-16">
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-16 flex-col items-center border-r border-white/15 bg-[#0d0d0d] py-5 lg:flex">
-      <span className="title-font text-3xl text-accent">AR</span>
-      <nav className="mt-16 flex flex-col gap-4" aria-label="Primary"><button type="button" aria-label="Your reminders" className="relative flex size-11 items-center justify-center border-l-2 border-accent text-white"><Bell className="size-5" /></button><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative flex size-11 items-center justify-center text-white/50 hover:text-white"><Search className="size-5" /></button></nav>
+      <Link href="/dashboard" aria-label="AniReminder dashboard" className="title-font text-3xl text-accent">AR</Link>
+      <nav className="mt-16 flex flex-col gap-4" aria-label="Primary"><Link href="/" aria-label="Homepage" className="relative flex size-11 items-center justify-center text-white/50 transition-colors hover:text-white"><Home className="size-5" /></Link><button type="button" aria-label="Your reminders" className="relative flex size-11 items-center justify-center border-l-2 border-accent text-white"><Bell className="size-5" /></button><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative flex size-11 items-center justify-center text-white/50 transition-colors hover:text-white"><Search className="size-5" /></button></nav>
       <button type="button" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/login" })} className="relative mt-auto flex size-11 items-center justify-center text-white/45 hover:text-white"><LogOut className="size-5" /></button>
     </aside>
-    <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/15 bg-[#0d0d0d] px-5 sm:px-8 lg:hidden"><span className="title-font text-3xl text-accent">ANI REMINDER</span><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative ml-auto flex size-11 items-center justify-center border border-white/20"><Search className="size-5" /></button><button type="button" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/login" })} className="relative ml-2 flex size-11 items-center justify-center border border-white/20"><LogOut className="size-5" /></button></header>
+    <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/15 bg-[#0d0d0d] px-5 sm:px-8 lg:hidden"><Link href="/dashboard" className="title-font text-3xl text-accent">ANI<span className="text-white">/</span>REMINDER</Link><Link href="/" aria-label="Homepage" className="relative ml-auto flex size-11 items-center justify-center border border-white/20"><Home className="size-5" /></Link><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative ml-2 flex size-11 items-center justify-center border border-white/20"><Search className="size-5" /></button><button type="button" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/login" })} className="relative ml-2 flex size-11 items-center justify-center border border-white/20"><LogOut className="size-5" /></button></header>
 
     <AnimatePresence mode="wait"><motion.main key="dashboard" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .22, ease: "easeOut" }} className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
       <div className="mb-9 flex items-end justify-between border-b border-white/15 pb-6">
