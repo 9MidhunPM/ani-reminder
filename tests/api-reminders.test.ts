@@ -18,7 +18,7 @@ const reminder: AnimeReminder = {
 const anime: AnimeSearchResult = {
   anilistId: 12, malId: null, title: "A real series", titleEnglish: null, imageUrl: "", type: "TV",
   episodes: null, status: "RELEASING", airing: true, nextAiringAt: null, broadcastDay: null,
-  broadcastTime: null, broadcastTimezone: "Asia/Kolkata", nextEpisode: null,
+  broadcastTime: null, broadcastTimezone: "Asia/Kolkata", nextEpisode: null, nextAiringId: null,
 };
 function request(body: unknown, origin = "http://localhost:3000") {
   return new Request("http://localhost:3000/api/reminders", { method: "POST", headers: { "content-type": "application/json", origin }, body: JSON.stringify(body) });
