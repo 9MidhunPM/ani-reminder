@@ -324,3 +324,13 @@ h1,h2,h3 { text-wrap: balance; }
 .lineup-summary h2 { font-size: 14px; font-weight: 500; }
 .lineup-summary p { font-size: 11px; color: var(--muted); margin-top: 6px; }
 @media (max-width: 600px) { .lineup-summary { flex-direction: column; align-items: flex-start; gap: 10px; } }
+.auth-form { width: 100%; }
+.auth-field { margin-bottom: 21px; }
+.auth-form .field { min-height: 49px; }
+.auth-form .password-field > button { height: 47px; }
+.auth-form .notice { margin-bottom: 18px; }
+.auth-submit { width: 100%; min-height: 49px; margin-top: 6px; justify-content: space-between; }
+.auth-switch { text-align: center; margin-top: 24px; color: var(--muted); font-size: 12px; }
+.auth-switch a { margin-left: 5px; color: var(--foreground); text-decoration: underline; text-underline-offset: 4px; }
+.auth-topic-label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.generate-topic { display: inline-flex; gap: 5px; align-items: center; background: none; color: var(--accent); border: 0; padding: 0; font-size: 10px; min-height: 32px; }
