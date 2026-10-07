@@ -85,7 +85,8 @@ export async function runScheduler(options: { delivery?: boolean; budgetMs?: num
   const counts = { leased: false, checked: 0, sent: 0, skipped: 0, deferred: 0, failed: 0, uncertain: 0 };
   if (!await acquireLease(owner, new Date())) return counts;
   counts.leased = true;
-  const haveBudget = () => Date.now() + 12_000 < deadline;
+  // Reserve time for provider spacing, verification and the publish timeout.
+  const haveBudget = () => Date.now() + 25_000 < deadline;
   const renew = async () => (await prisma.schedulerControl.updateMany({
     where: { id: "main", leaseOwner: owner, leaseUntil: { gt: new Date() } },
     data: { leaseUntil: new Date(Date.now() + LEASE_MS) },
