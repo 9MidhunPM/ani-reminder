@@ -63,8 +63,11 @@ async function queryAniList<T>(query: string, variables: Record<string, unknown>
 }
 
 function normalize(media: AniListMedia): AnimeSearchResult {
-  const airingAt = media.nextAiringEpisode?.airingAt;
-  const nextAiringAt = airingAt ? new Date(airingAt * 1000) : null;
+  const candidate = media.nextAiringEpisode;
+  const recordValid = candidate && candidate.mediaId === media.id &&
+    [candidate.id, candidate.episode, candidate.airingAt].every((n) => Number.isSafeInteger(n) && n > 0);
+  const candidateDate = recordValid ? new Date(candidate.airingAt * 1000) : null;
+  const nextAiringAt = candidateDate && Number.isFinite(candidateDate.getTime()) ? candidateDate : null;
   return {
     anilistId: media.id,
     malId: media.idMal,
@@ -79,8 +82,8 @@ function normalize(media: AniListMedia): AnimeSearchResult {
     broadcastDay: nextAiringAt?.toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Kolkata" }) ?? null,
     broadcastTime: nextAiringAt?.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" }) ?? null,
     broadcastTimezone: "Asia/Kolkata",
-    nextEpisode: media.nextAiringEpisode?.episode ?? null,
-    nextAiringId: media.nextAiringEpisode?.id ?? null,
+    nextEpisode: nextAiringAt ? candidate!.episode : null,
+    nextAiringId: nextAiringAt ? candidate!.id : null,
   };
 }
 
@@ -101,7 +104,7 @@ export async function getAnime(anilistId: number) {
     `query Anime($id: Int!) { Media(id: $id, type: ANIME) { ${MEDIA_FIELDS} } }`,
     { id: anilistId },
   );
-  if (!data.Media) throw new Error("Anime not found on AniList");
+  if (!data.Media || data.Media.id !== anilistId) throw new Error("Anime not found on AniList");
   return normalize(data.Media);
 }
 

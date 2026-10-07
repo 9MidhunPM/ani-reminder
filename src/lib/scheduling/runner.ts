@@ -29,6 +29,8 @@ export async function claimDelivery(delivery: NotificationDelivery, owner: strin
     WHERE d."id" = ${delivery.id} AND d."state" IN ('PENDING','FAILED') AND d."attempts" < 3
       AND d."sourceId" = ${delivery.sourceId} AND d."airingAt" = ${delivery.airingAt}
       AND d."scheduledFor" <= ${now} AND d."scheduledFor" >= c."cutoverAt"
+      AND ((d."kind" = 'MORNING' AND ${now} < d."scheduledFor" + INTERVAL '1 hour' AND ${now} < d."airingAt")
+        OR (d."kind" = 'AIRTIME' AND ${now} < d."airingAt" + INTERVAL '30 minutes'))
       AND r."userId" = d."userId" AND r."anilistId" = d."anilistId" AND r."enabled" = true
       AND u."id" = d."userId" AND ((d."kind" = 'MORNING' AND u."morningEnabled") OR (d."kind" = 'AIRTIME' AND u."airtimeEnabled"))
       AND c."id" = 'main' AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${now}`;
@@ -42,6 +44,9 @@ export async function deliveryAuthorized(delivery: NotificationDelivery, owner: 
     JOIN "AnimeReminder" r ON r."userId" = d."userId" AND r."anilistId" = d."anilistId"
     JOIN "SchedulerControl" c ON c."id" = 'main'
     WHERE d."id" = ${delivery.id} AND d."state" = 'CLAIMED' AND r."enabled" = true
+      AND d."scheduledFor" <= ${now} AND d."scheduledFor" >= c."cutoverAt"
+      AND ((d."kind" = 'MORNING' AND ${now} < d."scheduledFor" + INTERVAL '1 hour' AND ${now} < d."airingAt")
+        OR (d."kind" = 'AIRTIME' AND ${now} < d."airingAt" + INTERVAL '30 minutes'))
       AND ((d."kind" = 'MORNING' AND u."morningEnabled") OR (d."kind" = 'AIRTIME' AND u."airtimeEnabled"))
       AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${now}`;
   return rows.length === 1;
