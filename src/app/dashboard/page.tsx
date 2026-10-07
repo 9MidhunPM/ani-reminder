@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { serializeReminder } from "@/lib/serialize-reminder";
 import { Dashboard } from "@/components/dashboard";
 
 export const dynamic = "force-dynamic";
@@ -12,5 +13,5 @@ export default async function DashboardPage() {
     where: { userId: session.user.id },
     orderBy: [{ enabled: "desc" }, { nextAiringAt: "asc" }],
   });
-  return <Dashboard initialReminders={reminders} email={session.user.email ?? ""} />;
+  return <Dashboard initialReminders={reminders.map(serializeReminder)} email={session.user.email ?? ""} initialNow={new Date().toISOString()} />;
 }

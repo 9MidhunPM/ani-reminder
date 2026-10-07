@@ -1,39 +1,79 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Home, LogOut, Search } from "lucide-react";
-import Link from "next/link";
-import { signOut } from "next-auth/react";
-import type { AnimeReminder } from "@prisma/client";
-import { useState } from "react";
-import { AnimeCard } from "@/components/anime-card";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Plus } from "lucide-react";
+import { AppShell, type DashboardView } from "@/components/app-shell";
+import { NextUp } from "@/components/next-up";
+import { WeekAgenda } from "@/components/week-agenda";
+import { Lineup } from "@/components/lineup";
 import { SearchOverlay } from "@/components/search-overlay";
+import { AccountSettingsPanel } from "@/components/account-settings";
+import { NotificationActivity } from "@/components/notification-activity";
+import { Notice, PageHeading } from "@/components/ui";
+import { apiRequest, errorMessage } from "@/lib/client-api";
+import { isComplete } from "@/lib/agenda";
+import type { ReminderView } from "@/lib/reminder-view";
 
-export function Dashboard({ initialReminders, email }: { initialReminders: AnimeReminder[]; email: string }) {
+const views: DashboardView[] = ["week", "lineup", "completed", "activity", "settings"];
+
+export function Dashboard({ initialReminders, email, initialNow }: { initialReminders: ReminderView[]; email: string; initialNow: string }) {
+  const router = useRouter();
+  const params = useSearchParams();
+  const requested = params.get("view") as DashboardView;
+  const view = views.includes(requested) ? requested : "week";
   const [reminders, setReminders] = useState(initialReminders);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [now, setNow] = useState(new Date(initialNow));
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const mutation = useRef(0);
 
-  async function refresh() {
-    const response = await fetch("/api/reminders");
-    if (response.ok) setReminders((await response.json()).reminders);
+  const refresh = useCallback(async (signal?: AbortSignal) => {
+    const revision = mutation.current;
+    try {
+      const body = await apiRequest<{ reminders: ReminderView[] }>("/api/reminders", { signal });
+      if (!signal?.aborted && revision === mutation.current) { setReminders(body.reminders); setError(""); }
+    } catch (error) { if (!signal?.aborted) setError(errorMessage(error)); }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setInterval(() => {
+      setNow(new Date());
+      if (document.visibilityState === "visible") void refresh(controller.signal);
+    }, 60_000);
+    const wake = () => { if (document.visibilityState === "visible") { setNow(new Date()); void refresh(controller.signal); } };
+    document.addEventListener("visibilitychange", wake);
+    return () => { controller.abort(); window.clearInterval(timer); document.removeEventListener("visibilitychange", wake); };
+  }, [refresh]);
+
+  function update(reminder: ReminderView) {
+    mutation.current += 1;
+    setReminders((previous) => previous.some((item) => item.id === reminder.id) ? previous.map((item) => item.id === reminder.id ? reminder : item) : [...previous, reminder]);
   }
+  function remove(id: string) {
+    mutation.current += 1;
+    setReminders((previous) => previous.filter((item) => item.id !== id));
+    setNotice("Removed from your lineup.");
+  }
+  const active = reminders.filter((reminder) => !isComplete(reminder));
+  const waiting = active.filter((reminder) => reminder.enabled && ["WAITING", "UNVERIFIED"].includes(reminder.scheduleState));
+  const finished = reminders.filter(isComplete);
+  const openSearch = () => setSearchOpen(true);
 
-  return <div className="min-h-dvh lg:pl-16">
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-16 flex-col items-center border-r border-white/15 bg-[#0d0d0d] py-5 lg:flex">
-      <Link href="/dashboard" aria-label="AniReminder dashboard" className="title-font text-3xl text-accent">AR</Link>
-      <nav className="mt-16 flex flex-col gap-4" aria-label="Primary"><Link href="/" aria-label="Homepage" className="relative flex size-11 items-center justify-center text-white/50 transition-colors hover:text-white"><Home className="size-5" /></Link><button type="button" aria-label="Your reminders" className="relative flex size-11 items-center justify-center border-l-2 border-accent text-white"><Bell className="size-5" /></button><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative flex size-11 items-center justify-center text-white/50 transition-colors hover:text-white"><Search className="size-5" /></button></nav>
-      <button type="button" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/login" })} className="relative mt-auto flex size-11 items-center justify-center text-white/45 hover:text-white"><LogOut className="size-5" /></button>
-    </aside>
-    <header className="sticky top-0 z-20 flex h-16 items-center border-b border-white/15 bg-[#0d0d0d] px-5 sm:px-8 lg:hidden"><Link href="/dashboard" className="title-font text-3xl text-accent">ANI<span className="text-white">/</span>REMINDER</Link><Link href="/" aria-label="Homepage" className="relative ml-auto flex size-11 items-center justify-center border border-white/20"><Home className="size-5" /></Link><button type="button" aria-label="Search anime" onClick={() => setSearchOpen(true)} className="relative ml-2 flex size-11 items-center justify-center border border-white/20"><Search className="size-5" /></button><button type="button" aria-label="Sign out" onClick={() => signOut({ callbackUrl: "/login" })} className="relative ml-2 flex size-11 items-center justify-center border border-white/20"><LogOut className="size-5" /></button></header>
-
-    <AnimatePresence mode="wait"><motion.main key="dashboard" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .22, ease: "easeOut" }} className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-      <div className="mb-9 flex items-end justify-between border-b border-white/15 pb-6">
-        <div><p className="mb-2 text-xs uppercase tracking-[.2em] text-white/40">Season watchlist / {reminders.length.toString().padStart(2, "0")}</p><h1 className="title-font text-5xl leading-none sm:text-7xl">YOUR <span className="text-accent">LINEUP</span></h1></div>
-        <div className="hidden text-right text-xs text-white/35 sm:block"><p>SYNCED TO NTFY</p><p className="mt-1 max-w-56 truncate">{email}</p></div>
-      </div>
-
-      {reminders.length ? <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{reminders.map((reminder) => <AnimeCard key={reminder.id} reminder={reminder} onChanged={refresh} />)}</div> : <section className="flex min-h-[58vh] flex-col items-start justify-center"><h2 className="title-font text-6xl leading-[.9] sm:text-8xl">YOUR LIST<br />IS EMPTY</h2><div className="mt-4 h-1 w-40 bg-accent" /><button type="button" onClick={() => setSearchOpen(true)} className="mt-10 flex h-12 items-center gap-3 rounded-[2px] border border-white/40 px-4 text-sm text-white hover:border-accent hover:text-accent"><Search className="size-4" />FIND YOUR ANIME</button></section>}
-    </motion.main></AnimatePresence>
-    <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} onAdded={refresh} />
-  </div>;
+  return <AppShell view={view} email={email} count={active.length} onSearch={openSearch}>
+    {error && <div className="dashboard-message"><Notice kind="error">{error} <button type="button" className="inline-link" onClick={() => refresh()}>Refresh your lineup</button></Notice></div>}
+    {notice && <div className="dashboard-message"><Notice kind="success" onDismiss={() => setNotice("")}>{notice}</Notice></div>}
+    {view === "week" && <>
+      <PageHeading title="Your week, on cue." description="A little anticipation. A clear view of what’s coming." action={<button type="button" className="button button-primary" onClick={openSearch}><Plus size={17} />Add anime</button>} />
+      <NextUp reminders={reminders} now={now} onAdd={openSearch} />
+      <WeekAgenda reminders={reminders} now={now} onLineup={() => router.push("/dashboard?view=lineup")} />
+      <div className="lineup-summary"><div><h2>Your lineup keeps its place.</h2><p>{active.length} followed {active.length === 1 ? "show" : "shows"}{waiting.length > 0 && ` · ${waiting.length} awaiting a published schedule`}{finished.length > 0 && ` · ${finished.length} completed`}</p></div><button type="button" className="text-button" onClick={() => router.push("/dashboard?view=lineup")}>Manage lineup <ArrowRight size={15} /></button></div>
+    </>}
+    {(view === "lineup" || view === "completed") && <Lineup key={view} reminders={reminders} completed={view === "completed"} onAdd={openSearch} onUpdated={update} onRemoved={remove} />}
+    {view === "activity" && <NotificationActivity />}
+    {view === "settings" && <AccountSettingsPanel />}
+    <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} onAdded={update} reminders={reminders} />
+  </AppShell>;
 }

@@ -319,3 +319,8 @@ h1,h2,h3 { text-wrap: balance; }
 .activity-date, .activity-explanation { font-size: 11px; color: var(--muted); margin-top: 6px; }
 .activity-more { padding-top: 25px; text-align: center; }
 @media (max-width: 600px) { .activity-item { display: grid; grid-template-columns: 36px minmax(0,1fr); gap: 10px 14px; align-items: start; } .activity-icon { width: 36px; height: 36px; } .activity-item > .status-badge { grid-column: 2; } }
+.dashboard-message { margin-bottom: 22px; }
+.lineup-summary { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding-top: 32px; margin-top: 11px; }
+.lineup-summary h2 { font-size: 14px; font-weight: 500; }
+.lineup-summary p { font-size: 11px; color: var(--muted); margin-top: 6px; }
+@media (max-width: 600px) { .lineup-summary { flex-direction: column; align-items: flex-start; gap: 10px; } }
