@@ -18,10 +18,10 @@ ALTER TABLE "AnimeReminder" ALTER COLUMN "nextEpisode" DROP NOT NULL,
 CREATE TABLE "SchedulerControl" (
   "id" TEXT PRIMARY KEY DEFAULT 'main',
   "deliveryEnabled" BOOLEAN NOT NULL DEFAULT false,
-  "cutoverAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "cutoverAt" TIMESTAMP(3) NOT NULL DEFAULT timezone('UTC', CURRENT_TIMESTAMP),
   "leaseOwner" TEXT, "leaseUntil" TIMESTAMP(3),
   "nextProviderRequestAt" TIMESTAMP(3), "providerBackoffUntil" TIMESTAMP(3),
-  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT timezone('UTC', CURRENT_TIMESTAMP)
 );
 -- A shared cutover and disabled delivery prevent legacy schedules being replayed.
 INSERT INTO "SchedulerControl" ("id") VALUES ('main');
@@ -33,7 +33,7 @@ CREATE TABLE "NotificationDelivery" (
   "airingAt" TIMESTAMP(3), "sourceId" INTEGER, "scheduledFor" TIMESTAMP(3) NOT NULL,
   "claimedAt" TIMESTAMP(3), "sentAt" TIMESTAMP(3), "error" TEXT, "receiptId" TEXT,
   "attempts" INTEGER NOT NULL DEFAULT 0,
-  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT timezone('UTC', CURRENT_TIMESTAMP),
   "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "NotificationDelivery_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "NotificationDelivery_episode_identity" CHECK (

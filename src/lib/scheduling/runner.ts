@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { NotificationDelivery } from "@prisma/client";
+import { Prisma, type NotificationDelivery } from "@prisma/client";
 import { getEpisodeContext, getAnime } from "../anilist";
 import { sendNtfy, NotificationError } from "../notifications";
 import { prisma } from "../prisma";
@@ -8,6 +8,12 @@ import { deliverEpisode, type DeliveryContext } from "./deliver";
 import { reconcileIntents, reconcileReminder } from "./reconcile";
 
 export const LEASE_MS = 60_000;
+
+// Prisma DateTime columns store UTC without a time zone. Raw Date parameters use
+// timestamptz, so normalize explicitly instead of inheriting the database session zone.
+function utcTimestamp(date: Date | null) {
+  return Prisma.sql`(${date}::timestamptz AT TIME ZONE 'UTC')`;
+}
 
 export async function acquireLease(owner: string, now: Date) {
   const result = await prisma.schedulerControl.updateMany({
@@ -22,33 +28,36 @@ export async function releaseLease(owner: string) {
 }
 
 export async function claimDelivery(delivery: NotificationDelivery, owner: string, now: Date) {
+  const at = utcTimestamp(now);
+  const airingAt = utcTimestamp(delivery.airingAt);
   const count = await prisma.$executeRaw`
-    UPDATE "NotificationDelivery" AS d SET "state" = 'CLAIMED', "claimedAt" = ${now},
-      "attempts" = d."attempts" + 1, "updatedAt" = ${now}
+    UPDATE "NotificationDelivery" AS d SET "state" = 'CLAIMED', "claimedAt" = ${at},
+      "attempts" = d."attempts" + 1, "updatedAt" = ${at}
     FROM "AnimeReminder" r, "User" u, "SchedulerControl" c
     WHERE d."id" = ${delivery.id} AND d."state" IN ('PENDING','FAILED') AND d."attempts" < 3
-      AND d."sourceId" = ${delivery.sourceId} AND d."airingAt" = ${delivery.airingAt}
-      AND d."scheduledFor" <= ${now} AND d."scheduledFor" >= c."cutoverAt"
-      AND ((d."kind" = 'MORNING' AND ${now} < d."scheduledFor" + INTERVAL '1 hour' AND ${now} < d."airingAt")
-        OR (d."kind" = 'AIRTIME' AND ${now} < d."airingAt" + INTERVAL '30 minutes'))
+      AND d."sourceId" = ${delivery.sourceId} AND d."airingAt" = ${airingAt}
+      AND d."scheduledFor" <= ${at} AND d."scheduledFor" >= c."cutoverAt"
+      AND ((d."kind" = 'MORNING' AND ${at} < d."scheduledFor" + INTERVAL '1 hour' AND ${at} < d."airingAt")
+        OR (d."kind" = 'AIRTIME' AND ${at} < d."airingAt" + INTERVAL '30 minutes'))
       AND r."userId" = d."userId" AND r."anilistId" = d."anilistId" AND r."enabled" = true
       AND u."id" = d."userId" AND ((d."kind" = 'MORNING' AND u."morningEnabled") OR (d."kind" = 'AIRTIME' AND u."airtimeEnabled"))
-      AND c."id" = 'main' AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${now}`;
+      AND c."id" = 'main' AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${at}`;
   return count === 1;
 }
 
 export async function deliveryAuthorized(delivery: NotificationDelivery, owner: string, now: Date) {
+  const at = utcTimestamp(now);
   const rows = await prisma.$queryRaw<Array<{ id: string }>>`
     SELECT d."id" FROM "NotificationDelivery" d
     JOIN "User" u ON u."id" = d."userId"
     JOIN "AnimeReminder" r ON r."userId" = d."userId" AND r."anilistId" = d."anilistId"
     JOIN "SchedulerControl" c ON c."id" = 'main'
     WHERE d."id" = ${delivery.id} AND d."state" = 'CLAIMED' AND r."enabled" = true
-      AND d."scheduledFor" <= ${now} AND d."scheduledFor" >= c."cutoverAt"
-      AND ((d."kind" = 'MORNING' AND ${now} < d."scheduledFor" + INTERVAL '1 hour' AND ${now} < d."airingAt")
-        OR (d."kind" = 'AIRTIME' AND ${now} < d."airingAt" + INTERVAL '30 minutes'))
+      AND d."scheduledFor" <= ${at} AND d."scheduledFor" >= c."cutoverAt"
+      AND ((d."kind" = 'MORNING' AND ${at} < d."scheduledFor" + INTERVAL '1 hour' AND ${at} < d."airingAt")
+        OR (d."kind" = 'AIRTIME' AND ${at} < d."airingAt" + INTERVAL '30 minutes'))
       AND ((d."kind" = 'MORNING' AND u."morningEnabled") OR (d."kind" = 'AIRTIME' AND u."airtimeEnabled"))
-      AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${now}`;
+      AND c."deliveryEnabled" = true AND c."leaseOwner" = ${owner} AND c."leaseUntil" > ${at}`;
   return rows.length === 1;
 }
 

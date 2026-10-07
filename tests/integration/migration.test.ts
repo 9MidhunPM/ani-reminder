@@ -15,6 +15,7 @@ test("legacy schedules are quarantined without losing accounts or pause preferen
     await prisma.$transaction(async tx => {
       await tx.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`);
       await tx.$executeRawUnsafe(`SET LOCAL search_path TO "${schema}"`);
+      await tx.$executeRawUnsafe("SET LOCAL TIME ZONE 'Asia/Kolkata'");
       async function apply(name: string) {
         const sql = await readFile(`prisma/migrations/${name}/migration.sql`, "utf8");
         for (const statement of sql.split(";").map(part => part.trim()).filter(Boolean)) {
@@ -32,9 +33,10 @@ test("legacy schedules are quarantined without losing accounts or pause preferen
       assert.equal(reminders[0].scheduleState, "UNVERIFIED");
       assert.equal(reminders[0].enabled, false);
       assert.equal(reminders[0].nextEpisode, 29);
-      const controls = await tx.$queryRaw<Array<{ deliveryEnabled: boolean; cutoverAt: Date }>>`SELECT "deliveryEnabled","cutoverAt" FROM "SchedulerControl"`;
+      const controls = await tx.$queryRaw<Array<{ deliveryEnabled: boolean; cutoverAt: Date; utcCutover: boolean }>>`SELECT "deliveryEnabled","cutoverAt", "cutoverAt" = timezone('UTC', CURRENT_TIMESTAMP)::timestamp(3) AS "utcCutover" FROM "SchedulerControl"`;
       assert.equal(controls[0].deliveryEnabled, false);
       assert.ok(controls[0].cutoverAt instanceof Date);
+      assert.equal(controls[0].utcCutover, true);
       const users = await tx.$queryRaw<Array<{ ntfyTopic: string; passwordHash: string }>>`SELECT "ntfyTopic","passwordHash" FROM "User"`;
       assert.equal(users[0].ntfyTopic, "preserved-ciphertext");
       assert.equal(users[0].passwordHash, "preserved-hash");

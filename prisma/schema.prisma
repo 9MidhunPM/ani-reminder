@@ -46,12 +46,12 @@ model User {
 model SchedulerControl {
   id String @id @default("main")
   deliveryEnabled Boolean @default(false)
-  cutoverAt DateTime @default(now())
+  cutoverAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
   leaseOwner String?
   leaseUntil DateTime?
   nextProviderRequestAt DateTime?
   providerBackoffUntil DateTime?
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)")) @updatedAt
 }
 
 model NotificationDelivery {
@@ -70,7 +70,7 @@ model NotificationDelivery {
   error String?
   receiptId String?
   attempts Int @default(0)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
   updatedAt DateTime @updatedAt
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
