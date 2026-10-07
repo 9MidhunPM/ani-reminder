@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scheme-only-dark">
+    <html lang="en" className="scheme-only-dark" data-scroll-behavior="smooth">
       <body className={`${display.variable} ${body.variable} antialiased`}>
         <DesignContract />
         {children}
