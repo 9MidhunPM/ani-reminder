@@ -90,3 +90,23 @@ h1,h2,h3 { text-wrap: balance; }
 .dialog-native { color: var(--foreground); margin: auto; max-height: calc(100dvh - 48px); overflow: auto; }
 .dialog-native::backdrop { background: rgba(0,0,0,.78); }
 @media (max-width: 600px) { .dialog-native { max-height: calc(100dvh - 24px); width: calc(100% - 24px); padding: 22px 18px; } }
+.lineup-card { display: grid; grid-template-columns: 90px minmax(0,1fr) auto; gap: 22px; align-items: center; padding: 23px 0; border-bottom: 1px solid var(--line); }
+.lineup-cover { width: 90px; height: 125px; }
+.lineup-card-paused .cover { opacity: .65; }
+.lineup-card h2 { font-size: 18px; line-height: 1.4; margin-top: 7px; font-weight: 600; }
+.lineup-alternate { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.lineup-date { font-size: 12px; color: #cbcbbf; margin-top: 10px; }
+.lineup-card-actions { display: flex; align-items: flex-end; flex-direction: column; gap: 20px; }
+.action-pair { display: flex; gap: 8px; }
+.lineup-countdown { color: var(--accent); font-size: 15px; font-variant-numeric: tabular-nums; }
+.lineup-card-error { grid-column: 1 / -1; }
+.schedule-detail { margin-top: 7px; color: var(--muted); font-size: 11px; }
+.schedule-detail summary { cursor: pointer; width: fit-content; text-decoration: underline; text-underline-offset: 3px; }
+.schedule-detail p { margin: 8px 0; max-width: 65ch; }
+.schedule-detail a { color: var(--foreground); display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 600px) {
+  .lineup-card { grid-template-columns: 64px minmax(0,1fr); gap: 14px; align-items: start; }
+  .lineup-cover { width: 64px; height: 90px; }
+  .lineup-card h2 { font-size: 16px; }
+  .lineup-card-actions { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+}
