@@ -16,6 +16,13 @@ export type DeliveryDependencies = {
 /** External I/O is injected so tests exercise the production ordering without sending messages. */
 export async function deliverEpisode(candidate: NotificationDelivery, cutoverAt: Date, deps: DeliveryDependencies) {
   if (!candidate.anilistId || !candidate.episode || candidate.kind === "TEST") return "ignored";
+  // Expired work cannot be sent. Prune it before provider I/O so missing
+  // historical records cannot consume every run's refresh budget. A newly
+  // published postponement can revive an unsent intent during reconciliation.
+  if (candidate.airingAt && deliveryWindow(candidate.kind, candidate.airingAt, deps.now(), cutoverAt) === "expired") {
+    await deps.finish(candidate.id, "SKIPPED", "Delivery window expired or predates cutover");
+    return "skipped";
+  }
   let context: DeliveryContext;
   try { context = await deps.confirm(candidate.anilistId, candidate.episode); }
   catch { return "deferred"; }

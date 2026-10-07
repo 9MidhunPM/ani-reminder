@@ -53,6 +53,20 @@ test("provider outage never uses a cached delivery timestamp", async () => {
   assert.equal(row.state, "PENDING");
 });
 
+test("expired deleted source records are pruned without spending provider budget", async () => {
+  const { row, deps, effects } = fixture();
+  row.airingAt = new Date(now.getTime() - 30 * 60_000);
+  deps.confirm = async () => { effects.push("confirm"); throw new Error("source deleted"); };
+  assert.equal(await deliverEpisode(row, cutoff, deps), "skipped");
+  assert.deepEqual(effects, ["SKIPPED"]);
+});
+
+test("pre-cutover intents are pruned before source requests", async () => {
+  const { row, deps, effects } = fixture();
+  assert.equal(await deliverEpisode(row, new Date(now.getTime() + 1), deps), "skipped");
+  assert.deepEqual(effects, ["SKIPPED"]);
+});
+
 test("concurrent workers can publish only the atomically claimed event", async () => {
   const { row, deps, effects } = fixture();
   const results = await Promise.all([deliverEpisode({ ...row }, cutoff, deps), deliverEpisode({ ...row }, cutoff, deps)]);
@@ -95,7 +109,8 @@ test("receipt persistence failure preserves a claim instead of retrying an accep
 
 test("crossing the delivery cutoff during verification suppresses the send", async () => {
   const { row, deps, effects } = fixture();
-  deps.now = () => new Date(now.getTime() + 30 * 60_000);
+  let clockReads = 0;
+  deps.now = () => clockReads++ === 0 ? now : new Date(now.getTime() + 30 * 60_000);
   assert.equal(await deliverEpisode(row, cutoff, deps), "skipped");
   assert.equal(effects.includes("publish"), false);
 });
