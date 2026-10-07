@@ -87,3 +87,6 @@ h1,h2,h3 { text-wrap: balance; }
 .dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
 .dialog-copy { color: var(--muted); font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+.dialog-native { color: var(--foreground); margin: auto; max-height: calc(100dvh - 48px); overflow: auto; }
+.dialog-native::backdrop { background: rgba(0,0,0,.78); }
+@media (max-width: 600px) { .dialog-native { max-height: calc(100dvh - 24px); width: calc(100% - 24px); padding: 22px 18px; } }
