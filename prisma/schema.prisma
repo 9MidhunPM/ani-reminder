@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ScheduleState {
+  UNVERIFIED
+  SCHEDULED
+  WAITING
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id           String          @id @default(cuid())
   email        String          @unique
@@ -25,8 +33,14 @@ model AnimeReminder {
   title              String
   titleEnglish       String?
   imageUrl            String
-  nextEpisode         Int
-  nextAiringAt        DateTime
+  nextEpisode         Int?
+  nextAiringAt        DateTime?
+  nextAiringId        Int?
+  mediaStatus        String?
+  scheduleState      ScheduleState @default(UNVERIFIED)
+  scheduleCheckedAt  DateTime?
+  nextCheckAt        DateTime?
+  syncError          String?
   broadcastDay        String?
   broadcastTime       String?
   broadcastTimezone   String?
@@ -41,6 +55,7 @@ model AnimeReminder {
   @@unique([userId, anilistId])
   @@unique([userId, malId])
   @@index([enabled, nextAiringAt])
+  @@index([nextCheckAt])
 }
 
 model RateLimit {
