@@ -86,6 +86,7 @@ test("weekly agenda completed library settings and search work together", async 
   await expect(dialog.getByRole("button", { name: "In your lineup" })).toBeDisabled();
   await expect(dialog.getByRole("button", { name: "Follow show" })).toBeEnabled();
   await capture(page, info, "search");
+  await expect(page.getByRole("searchbox", { name: "Search anime titles" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Add anime", exact: true })).toBeFocused();

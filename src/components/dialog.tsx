@@ -25,6 +25,13 @@ export function Dialog({ open, title, onClose, children, small = false }: { open
   }, [open]);
   if (!open) return null;
   return <dialog ref={ref} aria-labelledby={titleId} className={`dialog dialog-native ${small ? "dialog-small" : ""}`}
+    onKeyDownCapture={(event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeRef.current();
+      }
+    }}
     onCancel={(event) => { event.preventDefault(); closeRef.current(); }}
     onClick={(event) => {
       if (event.target !== event.currentTarget) return;
