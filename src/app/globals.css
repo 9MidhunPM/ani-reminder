@@ -110,3 +110,34 @@ h1,h2,h3 { text-wrap: balance; }
   .lineup-card h2 { font-size: 16px; }
   .lineup-card-actions { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
 }
+.next-up { display: flex; position: relative; justify-content: space-between; gap: 30px; background: var(--surface); min-height: 260px; overflow: hidden; border-radius: 8px; }
+.next-up-main { padding: 30px 0 28px 30px; flex: 1; min-width: 0; }
+.next-up-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.next-up h2 { font-size: clamp(38px,4.3vw,62px); margin-top: 22px; max-width: 19ch; }
+.next-up-date { color: #cacabd; font-size: 13px; margin-top: 13px; }
+.next-up-date > span { padding: 0 9px; color: #676b5c; }
+.next-up-bottom { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-top: 22px; }
+.next-up-countdown { display: flex; align-items: baseline; gap: 13px; color: var(--accent); font-size: 23px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.next-up-countdown small { color: var(--muted); font-size: 11px; font-weight: 400; }
+.next-up-source { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.next-up-source:hover { color: var(--foreground); }
+.next-up-cover { width: 190px; align-self: stretch; border-radius: 0; }
+.next-up-warning { color: #dfc395; font-size: 12px; margin-top: 15px; }
+.next-up-empty { align-items: center; padding: 32px; }
+.next-up-empty h2 { margin-top: 16px; }
+.next-up-empty p:not(.eyebrow) { font-size: 13px; color: var(--muted); margin: 14px 0 20px; max-width: 48ch; }
+.next-up-empty-icon { width: 160px; height: 160px; color: #555c45; flex-shrink: 0; margin: 0 38px; }
+@media (max-width: 700px) {
+  .next-up { gap: 16px; min-height: 235px; }
+  .next-up-main { padding: 23px 0 24px 22px; }
+  .next-up-kicker { gap: 8px; }
+  .next-up-kicker .status-badge { font-size: 9px; }
+  .next-up h2 { font-size: 36px; margin-top: 18px; }
+  .next-up-cover { width: 110px; }
+  .next-up-bottom, .next-up-countdown { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .next-up-source { margin-top: 8px; }
+  .next-up-date { font-size: 11px; }
+  .next-up-date > span { padding: 0 3px; }
+  .next-up-empty { padding: 24px; }
+  .next-up-empty-icon { width: 70px; height: 70px; margin: 0; }
+}
