@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { encryptSecret } from "../src/lib/secrets";
 
+async function main() {
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
 if (!["localhost", "127.0.0.1"].includes(url.hostname) || !url.pathname.includes("ani_reminder_qa")) {
   throw new Error("QA seeding requires the isolated local ani_reminder_qa database");
@@ -41,3 +42,6 @@ for (let index = 0; index < titles.length; index++) {
 }
 console.log("Local QA account and illustrative schedules ready; scheduler delivery remains disabled.");
 await prisma.$disconnect();
+}
+
+main().catch(error => { console.error(error); process.exitCode = 1; });

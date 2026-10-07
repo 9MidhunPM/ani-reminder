@@ -17,4 +17,10 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 1000 } } },
     { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
+  webServer: process.env.E2E_START_SERVER ? {
+    command: "npm run start -- --hostname 127.0.0.1 --port 3016",
+    url: "http://127.0.0.1:3016",
+    reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
+  } : undefined,
 });
