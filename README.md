@@ -1,14 +1,17 @@
 # AniReminder
 
-Track seasonal anime releases and receive ntfy pushes at 6 AM IST and exact episode airtime.
+Plan your anime week and receive ntfy pushes for provider-confirmed episodes at 6 AM IST and exact episode airtime.
 
 ## Features
 
 - **AniList search:** Add anime directly from AniList data without manual schedule entry.
-- **Release alerts:** Deliver release-day and airtime notifications through a private ntfy topic.
-- **Schedule tracking:** Follow weekly and irregular episode dates with live countdowns.
+- **Release timeline:** See published upcoming episodes in a seven-day agenda and compact lineup.
+- **Verified alerts:** Confirm each exact episode with AniList before publishing; never invent weekly recurrence dates.
+- **Honest lifecycle:** Keep waiting, paused, cancelled, and completed shows distinct.
 - **Per-anime controls:** Pause or delete reminders independently.
-- **Editorial interface:** Use a responsive, image-led dark layout designed for anime watchlists.
+- **Notification settings:** Control morning and airtime alerts independently, replace your encrypted topic, and explicitly test delivery.
+- **Activity:** Review accepted, failed, uncertain, and skipped notification records.
+- **Accessible interface:** Responsive desktop/mobile navigation, keyboard-safe dialogs, and reduced-motion support.
 
 ## Getting Started
 
@@ -48,15 +51,23 @@ npm run typecheck    # verify TypeScript types
 npm run build        # create a production build
 npm run db:migrate   # create and apply a development migration
 npm run db:deploy    # apply committed migrations
+npm test            # run deterministic scheduler and API tests
+npm run test:integration # PostgreSQL tests; requires TEST_DATABASE_URL
+npm run test:e2e    # browser tests against E2E_BASE_URL (default :3016)
+npm run scheduler -- status # inspect delivery and reconciliation state
 ```
 
 ## Deployment
 
-The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prisma migrations on startup, and runs an internal minute-level cron that calls the authenticated `/api/cron` endpoint. The web server drops root privileges before listening on port `3000`. PostgreSQL must remain on the private container network with no external port or public domain.
+The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prisma migrations on startup, and runs an internal minute-level cron that calls the authenticated `/api/cron` endpoint. The web server drops root privileges before listening on port `3000`. `/api/health` verifies database readiness. PostgreSQL must remain on the private container network with no external port or public domain.
+
+The verified-schedule migration initially disables delivery and quarantines existing dates. Reconcile and verify before enabling notifications. Read [scheduler behavior](docs/scheduler.md) and the [production release runbook](docs/deployment.md) before upgrading an existing installation.
+
+For local browser QA, use an isolated local database named `ani_reminder_qa`, apply migrations, run `npx tsx scripts/qa-seed.ts`, and start the app on `127.0.0.1:3016`. The seed refuses production databases. Its illustrative schedules are test fixtures and must never be published as live release data.
 
 ## Tech Stack
 
-- [Next.js 15](https://nextjs.org/) and React 19
+- [Next.js 16](https://nextjs.org/) and React 19
 - [Tailwind CSS v4](https://tailwindcss.com/) and Framer Motion
 - [Auth.js](https://authjs.dev/) credentials authentication
 - [Prisma](https://www.prisma.io/) with PostgreSQL
@@ -65,4 +76,4 @@ The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prism
 
 ## License
 
-Private project. All rights reserved.
+All rights reserved.
