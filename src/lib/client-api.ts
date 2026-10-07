@@ -11,10 +11,12 @@ export async function apiRequest<T>(url: string, options: RequestInit = {}): Pro
   try {
     response = await fetch(url, {
       ...options,
+      signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(20_000)]) : AbortSignal.timeout(20_000),
       headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers },
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") throw error;
+    if (error instanceof Error && error.name === "TimeoutError") throw new ClientError("The request took too long. Please try again.", 0);
     throw new ClientError("Could not connect. Check your connection and try again.", 0);
   }
   const body = await response.json().catch(() => null);

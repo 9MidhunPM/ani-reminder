@@ -452,3 +452,10 @@ h1,h2,h3 { text-wrap: balance; }
  .public-footer .brand { width: 100%; }
 }
 @media (max-width: 420px) { .public-header .brand-name { font-size: 23px; } .public-header .brand-mark { width: 29px; height: 29px; } .public-header nav > a:not(.button) { display: none; } .public-hero h1 { font-size: 77px; } .public-section-title { flex-direction: column; gap: 16px; } .public-section-title > p br { display: none; } .public-close h2 { font-size: 42px; } }
+.loading-state { padding: 20px 0; }
+.loading-state > p { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+.loading-row { display: flex; align-items: center; gap: 16px; border-top: 1px solid var(--line); padding: 20px 0; }
+.loading-row > span { width: 46px; height: 58px; border-radius: 5px; background: var(--surface-raised); }
+.loading-row > div { flex: 1; }
+.loading-row i { display: block; width: 48%; height: 12px; border-radius: 3px; background: var(--surface-raised); }
+.loading-row i + i { width: 28%; height: 9px; margin-top: 12px; }

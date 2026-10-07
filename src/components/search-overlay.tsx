@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Dialog } from "@/components/dialog";
 import { AnimeCover } from "@/components/anime-cover";
 import { Notice } from "@/components/ui";
+import { LoadingState } from "@/components/loading-state";
 import { apiRequest, errorMessage } from "@/lib/client-api";
 import { formatAiring } from "@/lib/agenda";
 import type { AnimeSearchResult } from "@/lib/anilist";
@@ -18,6 +19,7 @@ export function SearchOverlay({ open, onClose, onAdded, reminders }: { open: boo
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState<SearchResponse>({ query: "", results: [], error: "" });
   const [busy, setBusy] = useState<number | null>(null);
+  const [retry, setRetry] = useState(0);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const search = query.trim();
   const valid = search.length >= 2;
@@ -37,7 +39,7 @@ export function SearchOverlay({ open, onClose, onAdded, reminders }: { open: boo
       }
     }, 350);
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [search, open]);
+  }, [search, open, retry]);
 
   async function add(anime: AnimeSearchResult) {
     setBusy(anime.anilistId); setMessage(null);
@@ -53,8 +55,8 @@ export function SearchOverlay({ open, onClose, onAdded, reminders }: { open: boo
     <p className="search-intro">Search AniList. Follow a show now, even if its next airing hasn’t been announced.</p>
     <label className="search-field search-catalog"><Search size={21} /><span className="sr-only">Search anime titles</span><input data-initial-focus type="search" className="field" value={query} onChange={(event) => { setQuery(event.target.value); setMessage(null); }} placeholder="Try One Piece, Frieren, or a favorite…" maxLength={150} /></label>
     {message && <div className="search-feedback"><Notice kind={message.error ? "error" : "success"} onDismiss={() => setMessage(null)}>{message.text}</Notice></div>}
-    {searching && <p className="search-status" role="status">Searching AniList…</p>}
-    {valid && current && response.error && <div className="search-feedback"><Notice kind="error">{response.error} <button type="button" className="inline-link" onClick={() => setResponse({ query: "", results: [], error: "" })}>Try searching again</button></Notice></div>}
+    {searching && <LoadingState label="Searching AniList…" rows={2} />}
+    {valid && current && response.error && <div className="search-feedback"><Notice kind="error">{response.error} <button type="button" className="inline-link" onClick={() => { setResponse({ query: "", results: [], error: "" }); setRetry((value) => value + 1); }}>Try searching again</button></Notice></div>}
     {valid && current && !response.error && !results.length && <p className="search-status" role="status">No titles found. Try another spelling or the Japanese title.</p>}
     {!valid && <div className="search-welcome"><Search size={31} strokeWidth={1.3} /><p>Every lineup starts with a title.</p><span>Type at least two characters to find yours.</span></div>}
     {valid && !!results.length && <><p className="search-result-count" role="status">{results.length} results from AniList</p><div className="search-results">{results.map((anime) => {

@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { ArrowUpRight, BellRing, Eye, EyeOff, LogOut } from "lucide-react";
 import { ConfirmDialog } from "@/components/dialog";
 import { Notice, PageHeading } from "@/components/ui";
+import { LoadingState } from "@/components/loading-state";
 import { apiRequest, errorMessage } from "@/lib/client-api";
 import type { AccountSettings, NotificationView } from "@/lib/reminder-view";
 
@@ -59,7 +60,7 @@ export function AccountSettingsPanel() {
   return <>
     <PageHeading title="Make it yours." description="A quieter lineup starts with the right notifications." />
     {loadError && <Notice kind="error">{loadError} <button type="button" className="inline-link" onClick={() => setRetry((value) => value + 1)}>Try again</button></Notice>}
-    {!settings && !loadError && <p className="loading-copy" role="status">Loading your preferences…</p>}
+    {!settings && !loadError && <LoadingState label="Loading your preferences…" />}
     {message && <div className="settings-message"><Notice kind={message.kind} onDismiss={() => setMessage(null)}>{message.text}</Notice></div>}
     {settings && <div className="settings-layout"><form onSubmit={save} className="settings-form">
       <section className="settings-section"><h2>Your alerts</h2><p>Choose when you’d like a nudge. Release times follow AniList’s published schedule.</p>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bell, RefreshCw, Sunrise, Zap } from "lucide-react";
 import { EmptyState, Notice, PageHeading } from "@/components/ui";
+import { LoadingState } from "@/components/loading-state";
 import { apiRequest, errorMessage } from "@/lib/client-api";
 import { formatAiring } from "@/lib/agenda";
 import type { NotificationView } from "@/lib/reminder-view";
@@ -39,7 +40,7 @@ export function NotificationActivity() {
 
   return <><PageHeading title="The delivery log." description="A clear record of your release alerts and test messages." action={<button type="button" className="button button-secondary" disabled={busy} onClick={() => load()}><RefreshCw size={15} />{busy ? "Refreshing…" : "Refresh"}</button>} />
     {error && <Notice kind="error">{error} <button type="button" className="inline-link" onClick={() => load()}>Try again</button></Notice>}
-    {!items && !error && <p className="loading-copy" role="status">Loading your notification history…</p>}
+    {!items && !error && <LoadingState label="Loading your notification history…" />}
     {items?.length === 0 && <EmptyState title="Quiet, for now." action={<a className="button button-secondary" href="/dashboard?view=settings">Send a test from Settings</a>}>When a release alert or test message is sent, its delivery result appears here.</EmptyState>}
     {!!items?.length && <><p className="activity-note">“Accepted by ntfy” means the service accepted the message. Check your device to confirm you received it.</p><ol className="activity-list">{items.map((item) => {
       const Icon = item.kind === "MORNING" ? Sunrise : item.kind === "AIRTIME" ? Zap : Bell;
