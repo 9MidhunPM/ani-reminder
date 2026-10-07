@@ -1,0 +1,53 @@
+name: Verify AniReminder
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ani_reminder_qa
+          POSTGRES_USER: ani_qa
+          POSTGRES_PASSWORD: local-test-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U ani_qa -d ani_reminder_qa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ani_qa:local-test-password@127.0.0.1:5432/ani_reminder_qa
+      TEST_DATABASE_URL: postgresql://ani_qa:local-test-password@127.0.0.1:5432/ani_reminder_qa
+      AUTH_URL: http://127.0.0.1:3016
+      AUTH_SECRET: isolated-ci-auth-secret-never-used-in-production
+      CRON_SECRET: isolated-ci-cron-secret-never-used-in-production
+      DATA_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      E2E_START_SERVER: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run db:deploy
+      - run: npm run test:integration
+      - run: npx tsx scripts/qa-seed.ts
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: /tmp/ani-reminder-browser-results
+          retention-days: 7

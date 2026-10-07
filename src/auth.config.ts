@@ -16,6 +16,7 @@ export const authConfig = {
       return session;
     },
     authorized({ auth: session, request }) {
+      if (request.nextUrl.pathname === "/api/health") return true;
       const isAuthenticated = Boolean(session?.user);
       const isAuthPage = ["/login", "/signup"].includes(request.nextUrl.pathname);
       if (isAuthPage && isAuthenticated) {

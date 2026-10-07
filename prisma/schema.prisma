@@ -7,14 +7,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ScheduleState {
+  UNVERIFIED
+  SCHEDULED
+  WAITING
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationKind {
+  MORNING
+  AIRTIME
+  TEST
+}
+
+enum DeliveryState {
+  PENDING
+  CLAIMED
+  SENT
+  FAILED
+  UNCERTAIN
+  SKIPPED
+}
+
 model User {
   id           String          @id @default(cuid())
   email        String          @unique
   passwordHash String
   ntfyTopic    String
+  morningEnabled Boolean @default(true)
+  airtimeEnabled Boolean @default(true)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   reminders    AnimeReminder[]
+  deliveries   NotificationDelivery[]
+}
+
+model SchedulerControl {
+  id String @id @default("main")
+  deliveryEnabled Boolean @default(false)
+  cutoverAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  leaseOwner String?
+  leaseUntil DateTime?
+  nextProviderRequestAt DateTime?
+  providerBackoffUntil DateTime?
+  updatedAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)")) @updatedAt
+}
+
+model NotificationDelivery {
+  id String @id @default(cuid())
+  userId String
+  anilistId Int?
+  episode Int?
+  kind NotificationKind
+  state DeliveryState @default(PENDING)
+  title String
+  airingAt DateTime?
+  sourceId Int?
+  scheduledFor DateTime
+  claimedAt DateTime?
+  sentAt DateTime?
+  error String?
+  receiptId String?
+  attempts Int @default(0)
+  createdAt DateTime @default(dbgenerated("timezone('UTC'::text, CURRENT_TIMESTAMP)"))
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, anilistId, episode, kind])
+  @@index([state, scheduledFor])
+  @@index([userId, createdAt])
 }
 
 model AnimeReminder {
@@ -25,8 +87,14 @@ model AnimeReminder {
   title              String
   titleEnglish       String?
   imageUrl            String
-  nextEpisode         Int
-  nextAiringAt        DateTime
+  nextEpisode         Int?
+  nextAiringAt        DateTime?
+  nextAiringId        Int?
+  mediaStatus        String?
+  scheduleState      ScheduleState @default(UNVERIFIED)
+  scheduleCheckedAt  DateTime?
+  nextCheckAt        DateTime?
+  syncError          String?
   broadcastDay        String?
   broadcastTime       String?
   broadcastTimezone   String?
@@ -41,6 +109,7 @@ model AnimeReminder {
   @@unique([userId, anilistId])
   @@unique([userId, malId])
   @@index([enabled, nextAiringAt])
+  @@index([nextCheckAt])
 }
 
 model RateLimit {

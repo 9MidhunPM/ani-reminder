@@ -6,8 +6,8 @@ export async function GET(request: Request) {
   if (!query || query.length < 2) return NextResponse.json({ results: [] });
   try {
     return NextResponse.json({ results: await searchAnime(query) });
-  } catch (error) {
-    console.error("AniList search failed", error);
+  } catch {
+    console.error("AniList search unavailable");
     return NextResponse.json({ error: "AniList search is unavailable right now" }, { status: 503 });
   }
 }
