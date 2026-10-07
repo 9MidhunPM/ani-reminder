@@ -46,7 +46,14 @@ export function notificationHandlers(deps: NotificationDependencies) {
       }
       const limit = await deps.rateLimit(userId);
       if (!limit.allowed) return Response.json({ error: "Please wait before sending another test notification." }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
-      const delivered = await deps.test(userId);
+      let delivered: Awaited<ReturnType<NotificationDependencies["test"]>>;
+      try {
+        delivered = await deps.test(userId);
+      } catch {
+        // A receipt-write failure can follow an accepted publish. Do not invite
+        // an immediate retry or misreport a confirmed transport failure.
+        return Response.json({ error: "The test could not be recorded. Check notification history before trying again." }, { status: 503 });
+      }
       if (!delivered) return Response.json({ error: "Configure a notification topic before sending a test." }, { status: 422 });
       return Response.json({ notification: serializeNotification(delivered.notification), testNotification: delivered.testNotification });
     },

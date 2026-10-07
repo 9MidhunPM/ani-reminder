@@ -56,6 +56,15 @@ test("test API returns uncertain outcome without falsely reporting success", asy
   assert.equal(body.notification.sentAt, null);
 });
 
+test("a lost receipt write returns a recoverable JSON error without publishing again", async () => {
+  let attempts = 0;
+  const { handlers } = setup({ test: async () => { attempts++; throw new Error("Storage offline"); } });
+  const response = await handlers.POST(request());
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /Check notification history/);
+  assert.equal(attempts, 1);
+});
+
 test("test writes reject unauthorized, cross-origin, and arbitrary notification content", async () => {
   const anonymous = setup({ authenticate: async () => null });
   assert.equal((await anonymous.handlers.GET(new Request("http://localhost:3000/api/notifications"))).status, 401);
