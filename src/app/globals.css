@@ -364,7 +364,7 @@ h1,h2,h3 { text-wrap: balance; }
 .public-hero-copy { padding-bottom: 20px; }
 .public-hero-copy .eyebrow { display: flex; align-items: center; gap: 9px; color: #b7bba9; font-size: 10px; }
 .hero-signal { height: 5px; width: 5px; border-radius: 50%; background: var(--accent); }
-.public-hero h1 { font-size: clamp(66px,7.6vw,112px); line-height: .92; letter-spacing: -.015em; margin: 32px 0 27px; }
+.public-hero h1 { font-size: clamp(66px,7.6vw,96px); line-height: .92; letter-spacing: -.015em; margin: 32px 0 27px; }
 .public-hero h1 span { color: var(--accent); }
 .public-hero-description { font-size: 15px; line-height: 1.9; max-width: 42ch; color: #bfc2b2; }
 .public-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 27px; margin-top: 30px; }
@@ -459,3 +459,6 @@ h1,h2,h3 { text-wrap: balance; }
 .loading-row > div { flex: 1; }
 .loading-row i { display: block; width: 48%; height: 12px; border-radius: 3px; background: var(--surface-raised); }
 .loading-row i + i { width: 28%; height: 9px; margin-top: 12px; }
+
+@media (pointer: coarse) { .filter-bar button, .search-result .button, .generate-topic { min-height: 44px; } .notice-close { min-height: 32px; min-width: 32px; display: grid; place-items: center; } }
+@media (max-width: 420px) { .public-header { gap: 12px; } .public-header .button { padding-left: 10px; padding-right: 10px; } }
