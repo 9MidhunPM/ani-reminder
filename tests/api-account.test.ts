@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { accountHandlers, type AccountDependencies } from "../src/lib/api-account";
 
+process.env.AUTH_URL = "http://localhost:3000";
+
 const account = { email: "viewer@example.com", morningEnabled: true, airtimeEnabled: true, ntfyTopic: "encrypted-private-topic" };
 function request(body: unknown, origin = "http://localhost:3000") {
   return new Request("http://localhost:3000/api/account", { method: "PATCH", headers: { "content-type": "application/json", origin }, body: JSON.stringify(body) });

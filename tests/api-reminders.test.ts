@@ -4,6 +4,8 @@ import type { AnimeReminder } from "@prisma/client";
 import type { AnimeSearchResult } from "../src/lib/anilist";
 import { reminderHandlers, type ReminderDependencies } from "../src/lib/api-reminders";
 
+process.env.AUTH_URL = "http://localhost:3000";
+
 const id = "c12345678901234567890";
 const now = new Date("2026-10-07T12:00:00Z");
 const reminder: AnimeReminder = {

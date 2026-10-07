@@ -3,6 +3,8 @@ import test from "node:test";
 import type { NotificationDelivery } from "@prisma/client";
 import { notificationHandlers, type NotificationDependencies } from "../src/lib/api-notifications";
 
+process.env.AUTH_URL = "http://localhost:3000";
+
 const now = new Date("2026-10-07T12:00:00Z");
 const notification: NotificationDelivery = {
   id: "c12345678901234567890", userId: "owner", anilistId: null, episode: null, kind: "TEST", state: "SENT",
