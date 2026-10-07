@@ -71,6 +71,20 @@ test("a duplicate add preserves paused state and does not contact provider", asy
   assert.deepEqual(writes, []);
 });
 
+test("concurrent duplicate adds converge without resuming or reconciling the winner", async () => {
+  let lookups = 0;
+  const { handlers, writes } = setup({
+    findExisting: async () => ++lookups < 3 ? null : reminder,
+    create: async () => { throw Object.assign(new Error("Unique constraint"), { code: "P2002" }); },
+  });
+  const response = await handlers.POST(request({ anilistId: 12 }));
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.tracked, true);
+  assert.equal(body.reminder.enabled, false);
+  assert.deepEqual(writes, []);
+});
+
 test("ended titles and provider failures never create reminders", async () => {
   for (const status of ["FINISHED", "CANCELLED"]) {
     const { handlers, writes } = setup({ getAnime: async () => ({ ...anime, status }) });

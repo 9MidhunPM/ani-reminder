@@ -22,7 +22,7 @@ export const signupSchema = z.object({
 });
 
 export const addReminderSchema = z.object({
-  anilistId: z.number().int().positive(),
+  anilistId: z.number().int().positive().max(2_147_483_647),
 }).strict();
 
 export const reminderIdSchema = z.string().regex(/^c[a-z0-9]{20,63}$/);

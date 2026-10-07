@@ -4,7 +4,7 @@ import { addReminderSchema, updateReminderSchema, updateAccountSchema, notificat
 
 test("reminder writes reject client-supplied identity and schedule fields", () => {
   assert.equal(addReminderSchema.safeParse({ anilistId: 12 }).success, true);
-  for (const value of [{ anilistId: 12, userId: "other" }, { anilistId: 12, nextEpisode: 99 }, { anilistId: "12" }, { anilistId: -1 }]) {
+  for (const value of [{ anilistId: 12, userId: "other" }, { anilistId: 12, nextEpisode: 99 }, { anilistId: "12" }, { anilistId: -1 }, { anilistId: 2_147_483_648 }]) {
     assert.equal(addReminderSchema.safeParse(value).success, false);
   }
   assert.equal(updateReminderSchema.safeParse({ enabled: false }).success, true);
