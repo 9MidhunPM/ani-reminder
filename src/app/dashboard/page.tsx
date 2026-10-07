@@ -5,6 +5,7 @@ import { serializeReminder } from "@/lib/serialize-reminder";
 import { Dashboard } from "@/components/dashboard";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Your lineup", robots: { index: false, follow: false } };
 
 export default async function DashboardPage() {
   const session = await auth();
