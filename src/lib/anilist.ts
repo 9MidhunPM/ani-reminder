@@ -1,4 +1,8 @@
+import { backoffProvider, ProviderDeferred, reserveProviderRequest } from "./scheduling/provider-budget";
+
 const ANILIST_URL = "https://graphql.anilist.co";
+
+export type AiringRecord = { id: number; mediaId: number; episode: number; airingAt: number };
 
 export type AnimeSearchResult = {
   anilistId: number;
@@ -15,6 +19,7 @@ export type AnimeSearchResult = {
   broadcastTime: string | null;
   broadcastTimezone: string;
   nextEpisode: number | null;
+  nextAiringId: number | null;
 };
 
 type AniListMedia = {
@@ -25,7 +30,7 @@ type AniListMedia = {
   format: string | null;
   episodes: number | null;
   status: string | null;
-  nextAiringEpisode: { airingAt: number; episode: number } | null;
+  nextAiringEpisode: AiringRecord | null;
 };
 
 const MEDIA_FIELDS = `
@@ -35,18 +40,21 @@ const MEDIA_FIELDS = `
   coverImage { extraLarge large }
   format
   episodes
-  status
-  nextAiringEpisode { airingAt episode }
+  status(version: 2)
+  nextAiringEpisode { id mediaId airingAt episode }
 `;
 
 async function queryAniList<T>(query: string, variables: Record<string, unknown>) {
-  const response = await fetch(ANILIST_URL, {
+  await reserveProviderRequest();
+  let response: Response;
+  try { response = await fetch(ANILIST_URL, {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
     signal: AbortSignal.timeout(10_000),
-    next: { revalidate: 60 },
-  });
+    cache: "no-store",
+  }); } catch { throw new ProviderDeferred(await backoffProvider()); }
+  if (response.status === 429 || response.status >= 500) throw new ProviderDeferred(await backoffProvider(response));
   const payload = (await response.json()) as { data?: T; errors?: Array<{ message: string }> };
   if (!response.ok || !payload.data || payload.errors?.length) {
     throw new Error(payload.errors?.[0]?.message ?? `AniList returned ${response.status}`);
@@ -72,6 +80,7 @@ function normalize(media: AniListMedia): AnimeSearchResult {
     broadcastTime: nextAiringAt?.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" }) ?? null,
     broadcastTimezone: "Asia/Kolkata",
     nextEpisode: media.nextAiringEpisode?.episode ?? null,
+    nextAiringId: media.nextAiringEpisode?.id ?? null,
   };
 }
 
@@ -94,4 +103,16 @@ export async function getAnime(anilistId: number) {
   );
   if (!data.Media) throw new Error("Anime not found on AniList");
   return normalize(data.Media);
+}
+
+/** Includes historical exact records so a confirmed finale survives next-pointer advancement. */
+export async function getEpisodeContext(anilistId: number, episode: number) {
+  const data = await queryAniList<{ Media: AniListMedia | null; AiringSchedule: AiringRecord | null }>(
+    `query ConfirmEpisode($id: Int!, $episode: Int!) {
+      Media(id: $id, type: ANIME) { ${MEDIA_FIELDS} }
+      AiringSchedule(mediaId: $id, episode: $episode) { id mediaId episode airingAt }
+    }`, { id: anilistId, episode },
+  );
+  if (!data.Media || data.Media.id !== anilistId) throw new Error("Anime could not be verified");
+  return { anime: normalize(data.Media), airing: data.AiringSchedule };
 }
