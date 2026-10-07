@@ -21,7 +21,7 @@ export async function reconcileIntents(tx: Prisma.TransactionClient, reminder: A
     const key = { userId: reminder.userId, anilistId: reminder.anilistId, episode: airing.episode, kind };
     // Updating only untouched outcomes preserves deduplication across removal/re-add and reschedules.
     await tx.notificationDelivery.createMany({ data: [{ ...key, ...data }], skipDuplicates: true });
-    await tx.notificationDelivery.updateMany({ where: { ...key, state: { in: ["PENDING", "FAILED", "SKIPPED"] } }, data });
+    await tx.notificationDelivery.updateMany({ where: { ...key, attempts: { lt: 3 }, state: { in: ["PENDING", "FAILED", "SKIPPED"] } }, data });
   }
 }
 
