@@ -55,6 +55,8 @@ The implementation includes a skip link, visible keyboard focus, labeled form fi
 
 ## Review boundary
 
-Independent visual inspection covered the populated desktop and mobile week views and Activity loading layouts. The week views showed readable heading, next-up, and calendar hierarchy without visible horizontal clipping. Initial capture fixtures reused one cover for unrelated titles and included the Next.js development issue badge; those are unsuitable as final showcase images.
+Independent visual inspection covered 14 local production-build captures: desktop and mobile versions of Home, Sign in, Signup, This week, Discover, Settings, and Activity. The populated week views show title-matched artwork, readable episode timing, and a seven-column desktop calendar that becomes stacked mobile day rows. Discover keeps result actions inside its dialog; authentication forms and Settings remain readable in their single-column mobile layouts. Activity reaches its completed empty state with a clear route to the explicit test action. No blocking clipping or layout defect was visible in this final set, and development issue badges are absent.
+
+The mobile Settings capture includes the keyboard-focused “Skip to content” link over the Save button at its captured scroll position. The source positions this link at the viewport top only while focused; this is a focus-and-scroll capture artifact, not a persistent overlap. Use an unfocused capture for a product showcase. Full-page captures also freeze viewport-fixed navigation and dialog backdrops within the document image; judge those elements against their viewport behavior.
 
 This document records implemented behavior. Screenshots alone do not verify keyboard interaction, successful provider delivery, current AniList schedule accuracy, or production deployment. Use the repository’s runtime and test evidence for those claims.
