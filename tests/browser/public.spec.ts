@@ -10,13 +10,13 @@ test("homepage gives a clear path to account creation", async ({ page }) => {
   await expect(signup).toBeVisible();
   await signup.click();
   await expect(page).toHaveURL(/\/signup$/);
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Email address", { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test("auth pages render without overflow and recover from bad credentials", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Email", { exact: true }).fill("absent@example.test");
+  await page.getByLabel("Email address", { exact: true }).fill("absent@example.test");
   await page.getByLabel("Password", { exact: true }).fill("incorrect-password");
   await page.locator('button[type="submit"]').click();
   await expect(page.getByRole("alert")).toBeVisible();
