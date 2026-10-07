@@ -15,14 +15,68 @@ enum ScheduleState {
   CANCELLED
 }
 
+enum NotificationKind {
+  MORNING
+  AIRTIME
+  TEST
+}
+
+enum DeliveryState {
+  PENDING
+  CLAIMED
+  SENT
+  FAILED
+  UNCERTAIN
+  SKIPPED
+}
+
 model User {
   id           String          @id @default(cuid())
   email        String          @unique
   passwordHash String
   ntfyTopic    String
+  morningEnabled Boolean @default(true)
+  airtimeEnabled Boolean @default(true)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   reminders    AnimeReminder[]
+  deliveries   NotificationDelivery[]
+}
+
+model SchedulerControl {
+  id String @id @default("main")
+  deliveryEnabled Boolean @default(false)
+  cutoverAt DateTime @default(now())
+  leaseOwner String?
+  leaseUntil DateTime?
+  nextProviderRequestAt DateTime?
+  providerBackoffUntil DateTime?
+  updatedAt DateTime @updatedAt
+}
+
+model NotificationDelivery {
+  id String @id @default(cuid())
+  userId String
+  anilistId Int?
+  episode Int?
+  kind NotificationKind
+  state DeliveryState @default(PENDING)
+  title String
+  airingAt DateTime?
+  sourceId Int?
+  scheduledFor DateTime
+  claimedAt DateTime?
+  sentAt DateTime?
+  error String?
+  receiptId String?
+  attempts Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, anilistId, episode, kind])
+  @@index([state, scheduledFor])
+  @@index([userId, createdAt])
 }
 
 model AnimeReminder {
