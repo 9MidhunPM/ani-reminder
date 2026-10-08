@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T02:36:53.837694+00:00",
+  "title": "Design System: AniReminder",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Coral red"
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Olive ink"
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Warm white"
+      },
+      "cinema-paper": {
+        "role": "neutral",
+        "displayName": "Cinema paper"
+      },
+      "cinema-light": {
+        "role": "neutral",
+        "displayName": "Light olive paper"
+      }
+    },
+    "typographyMeta": {
+      "cinema-display": {
+        "displayName": "Cinematic display",
+        "purpose": "The three-line public opening."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptions, controls, and schedule detail."
+      },
+      "eyebrow": {
+        "displayName": "Eyebrow",
+        "purpose": "Short editorial labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "poster",
+        "value": "12px 22px 30px #05060480",
+        "purpose": "Depth under layered homepage artwork."
+      },
+      {
+        "name": "example-alert",
+        "value": "8px 15px 30px #0005",
+        "purpose": "Paper sample notification above the posters."
+      },
+      {
+        "name": "motion-control",
+        "value": "4px 6px 18px #0005",
+        "purpose": "Legibility for the fixed pause control."
+      },
+      {
+        "name": "dialog",
+        "value": "0 24px 70px rgba(0,0,0,.35)",
+        "purpose": "Application modal layer."
+      }
+    ],
+    "motion": [
+      {
+        "name": "cinema-arrival",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Confident focal arrivals and bounded section entrances."
+      },
+      {
+        "name": "title-entrance",
+        "value": ".85s",
+        "purpose": "Masked headline lines; offsets of .1s and .2s."
+      },
+      {
+        "name": "poster-entrance",
+        "value": "1s",
+        "purpose": "Initial three-poster staging."
+      },
+      {
+        "name": "poster-drift",
+        "value": "7s ease-in-out infinite",
+        "purpose": "Slow decorative layer drift, pausable and offscreen-aware."
+      },
+      {
+        "name": "alert-drift",
+        "value": "8s ease-in-out infinite",
+        "purpose": "Slow illustrative alert movement."
+      },
+      {
+        "name": "marquee",
+        "value": "32s linear infinite",
+        "purpose": "Tilted editorial strip; hidden from assistive technology."
+      },
+      {
+        "name": "preview-change",
+        "value": ".35s cubic-bezier(.16,1,.3,1)",
+        "purpose": "Feedback for explicit example-state selection."
+      },
+      {
+        "name": "reduced-or-paused",
+        "value": "animation: none; transition: none",
+        "purpose": "Complete static page when paused or system reduced motion applies."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "cinema-intermediate",
+        "value": "1050px"
+      },
+      {
+        "name": "cinema-stack",
+        "value": "700px"
+      },
+      {
+        "name": "cinema-compact",
+        "value": "370px"
+      },
+      {
+        "name": "application-mobile-navigation",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary application button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Compact account and lineup action with the shared coral accent.",
+      "html": "<button class=\"ds-button-primary\">Save preferences</button>",
+      "css": ".ds-button-primary{min-height:44px;padding:11px 18px;border:1px solid transparent;border-radius:5px;background:var(--accent,#f15343);color:#151510;font:650 13px/1.4 var(--font-body,sans-serif);cursor:pointer;transition:background-color 140ms}.ds-button-primary:hover{background:var(--accent-hover,#ff6959)}.ds-button-primary:focus-visible{outline:2px solid var(--accent,#f15343);outline-offset:5px}.ds-button-primary:active{background:var(--accent,#f15343)}"
+    },
+    {
+      "name": "Secondary application button",
+      "kind": "button",
+      "description": "A quieter action with an olive outline.",
+      "html": "<button class=\"ds-button-secondary\">View lineup</button>",
+      "css": ".ds-button-secondary{min-height:44px;padding:11px 18px;border:1px solid #505247;border-radius:5px;background:transparent;color:var(--foreground,#f4f1e9);font:650 13px/1.4 var(--font-body,sans-serif);cursor:pointer;transition:background-color 140ms,border-color 140ms}.ds-button-secondary:hover{border-color:var(--foreground,#f4f1e9);background:var(--surface-raised,#22231f)}.ds-button-secondary:focus-visible{outline:2px solid var(--accent,#f15343);outline-offset:5px}"
+    },
+    {
+      "name": "Cinematic homepage action",
+      "kind": "button",
+      "refersTo": "cinema-button",
+      "description": "The public lineup action with a paper sweep and directional arrow.",
+      "html": "<a class=\"ds-cinema-button\" href=\"#lineup\"><span>Build my lineup</span><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
+      "css": ".ds-cinema-button{display:inline-flex;align-items:center;justify-content:space-between;gap:25px;min-height:54px;padding:0 23px;border-radius:3px;background:var(--accent,#f15343);color:#171813;font:650 13px/1.4 var(--font-body,sans-serif);text-decoration:none;position:relative;isolation:isolate;overflow:hidden}.ds-cinema-button:before{content:\"\";position:absolute;inset:0;z-index:-1;background:#f1eee6;transform:translateY(105%) skewY(-8deg);transition:transform .4s cubic-bezier(.16,1,.3,1)}.ds-cinema-button:hover:before{transform:translateY(0) skewY(0)}.ds-cinema-button svg{transition:transform .3s cubic-bezier(.16,1,.3,1)}.ds-cinema-button:hover svg{transform:translate(3px,-3px)}.ds-cinema-button:focus-visible{outline:2px solid var(--accent,#f15343);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-cinema-button:before,.ds-cinema-button svg{transition:none}}"
+    },
+    {
+      "name": "Labeled field",
+      "kind": "input",
+      "description": "Dark, readable form control used by authentication and settings.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-email\">Email address</label><input class=\"ds-field\" id=\"ds-email\" type=\"email\" placeholder=\"you@example.com\">",
+      "css": ".ds-field-label{display:block;margin-bottom:8px;color:var(--foreground,#f4f1e9);font:600 13px/1.6 var(--font-body,sans-serif)}.ds-field{box-sizing:border-box;width:100%;min-height:46px;padding:10px 13px;border:1px solid #505247;border-radius:5px;background:var(--background,#111210);color:var(--foreground,#f4f1e9);font:15px/1.6 var(--font-body,sans-serif)}.ds-field::placeholder{color:#929488}.ds-field:focus{border-color:var(--accent,#f15343)}.ds-field:focus-visible{outline:2px solid var(--accent,#f15343);outline-offset:5px}"
+    },
+    {
+      "name": "Public navigation",
+      "kind": "nav",
+      "description": "Plain public links with a visible outlined account action.",
+      "html": "<nav class=\"ds-public-nav\" aria-label=\"Example navigation\"><a href=\"#experience\">The experience</a><a href=\"#signin\">Sign in</a><a class=\"ds-nav-cta\" href=\"#signup\">Get started <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a></nav>",
+      "css": ".ds-public-nav{display:flex;align-items:center;gap:30px;font:12px/1.6 var(--font-body,sans-serif)}.ds-public-nav a{display:inline-flex;align-items:center;gap:12px;min-height:44px;color:var(--foreground,#f4f1e9);text-decoration:none;transition:color .2s,background .2s}.ds-public-nav a:hover{color:var(--accent,#f15343)}.ds-public-nav .ds-nav-cta{padding:0 17px;border:1px solid #4b4c43;border-radius:3px}.ds-public-nav .ds-nav-cta:hover{color:var(--background,#111210);background:#f1eee6;border-color:#f1eee6}.ds-public-nav a:focus-visible{outline:2px solid var(--accent,#f15343);outline-offset:5px}"
+    },
+    {
+      "name": "Schedule state label",
+      "kind": "chip",
+      "description": "A written schedule state with a small confirmation dot.",
+      "html": "<span class=\"ds-status\">Scheduled</span>",
+      "css": ".ds-status{display:inline-flex;align-items:center;gap:6px;font:600 10px/1.4 var(--font-body,sans-serif);color:var(--positive,#c4d5a7);letter-spacing:.045em;text-transform:uppercase}.ds-status:before{content:\"\";width:5px;height:5px;border-radius:50%;background:currentColor}"
+    },
+    {
+      "name": "Illustrative lineup panel",
+      "kind": "card",
+      "refersTo": "preview",
+      "description": "An example schedule kept visibly separate from live user data.",
+      "html": "<section class=\"ds-preview\"><div class=\"ds-preview-top\"><strong>Your lineup, in motion.</strong><span>Illustrative example</span></div><h3>Episode 12. On your radar.</h3><p>Sunday \u00b7 6:30 pm IST \u00b7 Published airing</p><div class=\"ds-preview-note\">This preview never sends a notification.</div></section>",
+      "css": ".ds-preview{padding:25px;border-radius:12px;background:#1b1e17;color:#f0f2e8;font:11px/1.8 var(--font-body,sans-serif)}.ds-preview-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:23px;color:#dadfcb}.ds-preview-top strong{font-weight:400}.ds-preview-top span{font-size:9px;color:#acb49b}.ds-preview h3{font:29px/1.1 var(--font-display,sans-serif);margin:9px 0 12px}.ds-preview p{margin:0;color:#b4bea0}.ds-preview-note{border-top:1px solid #3a4430;margin-top:20px;padding-top:19px;color:#acb69b;font-size:9px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The next-episode opening",
+    "overview": "AniReminder gives anticipation a clear place in the week. Its identity combines near-black olive surfaces, warm white type, coral red actions, condensed display lettering, and real anime artwork. The voice stays direct about release dates and quiet about unannounced episodes.\n\nThe public homepage uses the user's chosen cinematic anime opening: a coral disc, three overlapping posters, sweeping typography, and a moving editorial strip. This expressive welcome leads into a working example of the product. The authenticated application keeps its release timeline and compact controls; homepage choreography does not become a requirement for everyday tasks.",
+    "keyCharacteristics": [
+      "Large condensed display type with concise supporting copy.",
+      "Red as the public focal material and the application action color.",
+      "Real title artwork, clearly separated from illustrative schedule data.",
+      "A rehearsed opening followed by quieter product proof and setup.",
+      "Explicit motion controls and a complete static presentation."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Rule",
+        "body": "Artwork and accent color convey atmosphere; only written schedule states establish release evidence.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** reserve cinematic choreography for the public welcome and keep application tasks quick.",
+      "**Do** retain the real poster artwork and clear title association.",
+      "**Do** label invented preview schedules and sample alerts as examples.",
+      "**Do** keep the main lineup action readable and reachable during motion.",
+      "**Do** show complete content with reduced motion and without JavaScript.",
+      "**Do** preserve the pause control, visible keyboard focus, and 44px interaction targets.",
+      "**Do** describe published airing times in IST and preserve quiet waiting/completed states."
+    ],
+    "donts": [
+      "**Don't** present the homepage's example episode or calendar as live schedule data.",
+      "**Don't** let poster layers capture interaction intended for a real control.",
+      "**Don't** autoplay sound or make visitors wait through a sequence before using the page.",
+      "**Don't** animate date or episode values to imply a provider update.",
+      "**Don't** hide essential content behind hydration, a reveal observer, or a motion preference.",
+      "**Don't** carry homepage loops into routine account or lineup work.",
+      "**Don't** describe ntfy acceptance as confirmation that a phone displayed a message."
+    ]
+  }
+}
