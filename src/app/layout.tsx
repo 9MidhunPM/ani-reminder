@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, DM_Sans } from "next/font/google";
 import { DesignContract } from "@/components/design-contract";
 import "./globals.css";
+import "./home.css";
 
 const display = Bebas_Neue({
   variable: "--font-display",
