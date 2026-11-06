@@ -19,7 +19,7 @@ git diff --check
 
 ## Prepare a disposable PostgreSQL database
 
-Integration tests **write and delete data**, create/drop a temporary migration schema, and temporarily change scheduler control records. They require a local `TEST_DATABASE_URL` whose database path contains `qa` or `test`. Browser fixtures and the seed use the stricter local `ani_reminder_qa` name check. These guards are not a substitute for using an empty disposable database.
+Integration tests **write and delete data**, create/drop a temporary migration schema, and temporarily change scheduler control records. They require a local `TEST_DATABASE_URL` whose database path contains `qa` or `test`. Browser fixtures and the seed require `localhost` or `127.0.0.1` and a database pathname containing `ani_reminder_qa`. These substring checks do not establish isolation; use an empty disposable database.
 
 Use a separate database from your normal development installation. The example below runs a temporary PostgreSQL 16 container bound only to loopback on port 55432. The password is a local fixture, not a deployment credential. Choose another container name or port if already occupied; do not remove an existing database to make room.
 
