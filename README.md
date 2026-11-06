@@ -73,7 +73,14 @@ The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prism
 
 The verified-schedule migration initially disables delivery and quarantines existing dates. Reconcile and verify before enabling notifications. Read [scheduler behavior](docs/scheduler.md) and the [production release runbook](docs/deployment.md) before upgrading an existing installation.
 
-For local browser QA, use an isolated local database named `ani_reminder_qa`, apply migrations, explicitly disable scheduler delivery, run `npx tsx scripts/qa-seed.ts`, and start the app on `127.0.0.1:3016`. The seed checks the local hostname and database name, but does not disable delivery itself. Its illustrative schedules are test fixtures and must never be published as live release data.
+Follow the [testing guide](docs/testing.md) for a complete local QA setup. Use an isolated local database named `ani_reminder_qa`, apply migrations, explicitly disable scheduler delivery, run `npx tsx scripts/qa-seed.ts`, and start the app on `127.0.0.1:3016`. The seed checks the local hostname and database name, but does not disable delivery itself. Its illustrative schedules are test fixtures and must never be published as live release data.
+
+## Documentation
+
+- [Local development](docs/development.md): configuration, database setup, and troubleshooting.
+- [Testing and contributor checks](docs/testing.md): isolated PostgreSQL fixtures, unit/integration checks, and Playwright setup.
+- [Scheduler behavior and operations](docs/scheduler.md): verified episodes, delivery controls, and notification states.
+- [Production release runbook](docs/deployment.md): controlled upgrades, verification, and recovery.
 
 ## Tech Stack
 

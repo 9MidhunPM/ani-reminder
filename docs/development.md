@@ -85,6 +85,6 @@ Resume with `docker compose up -d --wait postgres` and `npm run dev`. The named 
 | Signup or settings changes reject the origin | Open the exact origin in `AUTH_URL`; `localhost` and `127.0.0.1` are different origins. Restart Next.js after changing environment values. |
 | Topic encryption fails | Check that `DATA_ENCRYPTION_KEY` decodes to 32 bytes and is the original key for any existing records. Do not print it in a bug report. |
 | No episode notifications | Check [scheduler behavior](scheduler.md). Local `dev`/`start` commands do not start cron, and an enabled account preference does not enable global delivery. |
-| Browser tests cannot connect | Build first and opt into Playwright's server with `E2E_START_SERVER=true`, or start a QA server yourself. See the testing guide. |
+| Browser tests cannot connect | Build first and opt into Playwright's server with `E2E_START_SERVER=true`, or start a QA server yourself. See the [testing guide](testing.md). |
 
-For application checks, see the README's command list. For the production image, upgrades, and recovery, use the [release runbook](deployment.md).
+For application checks and isolated browser fixtures, follow the [testing guide](testing.md). For the production image, upgrades, and recovery, use the [release runbook](deployment.md).
