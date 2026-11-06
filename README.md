@@ -15,19 +15,29 @@ Plan your anime week and receive ntfy pushes for provider-confirmed episodes at 
 
 ## Getting Started
 
-Requires Node.js 22+, npm 10+, Docker, and Docker Compose.
+Requires **Node.js 22+**, **npm 10+**, Git, and Docker with Compose v2. CI and the application image use Node.js 22. Commands below use a POSIX shell.
 
-```bash
+```sh
 git clone https://github.com/9MidhunPM/ani-reminder.git
 cd ani-reminder
-npm install
-cp .env.example .env
-docker compose up -d
+npm ci
+test -e .env || cp .env.example .env
+```
+
+Edit `.env` before starting: replace `AUTH_SECRET`, `CRON_SECRET`, and `DATA_ENCRYPTION_KEY` with three independently generated values. Run `openssl rand -base64 32` separately for each. Keep `AUTH_URL=http://localhost:3000` and the example `DATABASE_URL` for this local setup. Preserve an existing encryption key when reusing a database.
+
+```sh
+docker compose up -d --wait postgres
+npx prisma generate
 npm run db:deploy
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), create an account, and enter an ntfy topic subscribed in the [ntfy app](https://ntfy.sh/docs/subscribe/phone/).
+Compose starts **PostgreSQL only**; the application runs in the foreground through `npm run dev`. The checked-in Compose file publishes database port 5432 on the host with development credentials. Use it only on an isolated development machine, not as a production deployment.
+
+Open [http://localhost:3000](http://localhost:3000), create an account, and use a separate development ntfy topic. Use the same hostname and port as `AUTH_URL` for authentication and settings changes. `/api/health` returns `{"status":"ok"}` when the database is reachable.
+
+**Local startup does not schedule notifications.** Migrations initially disable episode delivery, and `npm run dev` does not start cron. Follow the [development guide](docs/development.md) for configuration and troubleshooting, and [scheduler operations](docs/scheduler.md) before intentionally enabling real alerts. Explicit test notifications can still publish to ntfy while episode delivery is disabled.
 
 ## Environment Variables
 
@@ -63,7 +73,7 @@ The multi-stage `Dockerfile` builds the Next.js standalone server, applies Prism
 
 The verified-schedule migration initially disables delivery and quarantines existing dates. Reconcile and verify before enabling notifications. Read [scheduler behavior](docs/scheduler.md) and the [production release runbook](docs/deployment.md) before upgrading an existing installation.
 
-For local browser QA, use an isolated local database named `ani_reminder_qa`, apply migrations, run `npx tsx scripts/qa-seed.ts`, and start the app on `127.0.0.1:3016`. The seed refuses production databases. Its illustrative schedules are test fixtures and must never be published as live release data.
+For local browser QA, use an isolated local database named `ani_reminder_qa`, apply migrations, explicitly disable scheduler delivery, run `npx tsx scripts/qa-seed.ts`, and start the app on `127.0.0.1:3016`. The seed checks the local hostname and database name, but does not disable delivery itself. Its illustrative schedules are test fixtures and must never be published as live release data.
 
 ## Tech Stack
 
